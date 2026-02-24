@@ -32,6 +32,7 @@ metadata:
 | `templates/scene-templates.md` | 特定场景类型时 | 电商/仙侠/短剧/科普/MV 场景模板 |
 | `examples/single-examples.md` | 需要参考范例时 | 6 个完整单段示例 |
 | `examples/multi-examples.md` | 需要参考范例时 | 4 个完整多段示例 |
+| `templates/output.html` | Phase 5 输出最终结果时 | HTML 可视化模板，替换 `{{变量}}` 后保存为 HTML 文件供用户浏览 |
 
 ---
 
