@@ -462,7 +462,82 @@
     border-color: rgba(52, 211, 153, 0.3);
   }
 
+  .prompt-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .prompt-section {
+    border-left: 3px solid var(--border);
+    padding-left: 16px;
+  }
+  .prompt-section:hover {
+    border-left-color: var(--accent);
+  }
+
+  .prompt-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .prompt-section-content {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+
+  .character-ref {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+  }
+
+  .ref-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: "SF Mono", "Fira Code", Menlo, monospace;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .character-ref .ref-desc {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+  }
+
+  .prompt-shot {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .prompt-shot:last-child {
+    border-bottom: none;
+  }
+
+  .prompt-shot-time {
+    font-weight: 600;
+    font-family: "SF Mono", "Fira Code", Menlo, monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+
+  .prompt-shot-speaker {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
   .prompt-text {
+    display: none;
     padding: 18px 20px;
     font-family: "SF Mono", "Fira Code", "Cascadia Code", Menlo, "Courier New", monospace;
     font-size: 0.82rem;
@@ -632,7 +707,7 @@
               <th>景别</th>
               <th>运镜</th>
               <th>画面描述</th>
-              <th>台词 / 旁白</th>
+              <th>角色 / 台词</th>
               <th>音效 / 音乐</th>
             </tr>
           </thead>
@@ -669,7 +744,56 @@
             <span class="copy-label">复制</span>
           </button>
         </div>
-        <pre class="prompt-text">{{prompt_text}}</pre>
+        <div class="prompt-body">
+
+          <div class="prompt-section">
+            <div class="prompt-section-label">角色 + 参考图</div>
+            <div class="prompt-section-content">
+              <!-- {{#characters}} -->
+              <div class="character-ref">
+                <span class="ref-tag">@图片{{ref_number}}</span>
+                <span class="ref-desc">{{character_name}}（{{character_role}}）— {{character_description}}</span>
+              </div>
+              <!-- {{/characters}} -->
+              <!-- {{#scene_refs}} -->
+              <div class="character-ref">
+                <span class="ref-tag">@图片{{ref_number}}</span>
+                <span class="ref-desc">场景参考 — {{scene_description}}</span>
+              </div>
+              <!-- {{/scene_refs}} -->
+            </div>
+          </div>
+
+          <div class="prompt-section">
+            <div class="prompt-section-label">背景介绍</div>
+            <div class="prompt-section-content">{{background_intro}}</div>
+          </div>
+
+          <div class="prompt-section">
+            <div class="prompt-section-label">镜头描述</div>
+            <div class="prompt-section-content">
+              <!-- {{#prompt_shots}} -->
+              <div class="prompt-shot">
+                <span class="prompt-shot-time">镜头{{shot_index}}（{{shot_time}}）：</span>
+                {{shot_size}}，{{shot_content}}，<span class="prompt-shot-speaker">{{speaker}}</span>{{dialogue}}，{{camera_move}}
+              </div>
+              <!-- {{/prompt_shots}} -->
+            </div>
+          </div>
+
+          <div class="prompt-section">
+            <div class="prompt-section-label">风格指令</div>
+            <div class="prompt-section-content">{{style_directives}}</div>
+          </div>
+
+          <div class="prompt-section">
+            <div class="prompt-section-label">禁止项</div>
+            <div class="prompt-section-content">{{negatives}}</div>
+          </div>
+
+        </div>
+        <!-- 隐藏的纯文本版本，供复制按钮使用 -->
+        <pre class="prompt-text">{{prompt_full_text}}</pre>
       </div>
     </div>
     <!-- {{/segments}} -->
