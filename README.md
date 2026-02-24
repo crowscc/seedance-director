@@ -52,14 +52,28 @@ Storyboard is confirmed via `AskUserQuestion` before moving on.
 
 ### Phase 4: Seedance Prompts
 
-Converts confirmed storyboard into **copy-paste-ready prompts** for the Seedance platform:
+Converts confirmed storyboard into **copy-paste-ready prompts** for the Seedance platform. Every prompt follows a fixed **five-section structure**:
 
 ```
-[Tech params]  Aspect ratio, duration, style, fps
-[Timestamped shots]  Per-second scene, camera move, lighting description
-[@References]  Each asset labeled with its role
-[Negatives]  No text, watermarks, logos
+## Characters + References
+  Character A: @Image1 — [appearance description]
+  Scene ref:   @Image3 — [environment description]
+
+## Background
+  [Context, environment, emotional atmosphere]
+
+## Shot Descriptions
+  Shot 1 (0-3s): [shot size], [content], Character A: "dialogue", [camera move]
+  Shot 2 (3-6s): ...
+
+## Style Directives
+  [Unified look: texture, color tone, lighting, depth of field, fps, aspect ratio]
+
+## Negatives
+  No text, watermarks, logos
 ```
+
+Each character is bound to its own reference image. Dialogue lines always tag the speaker. All @references use Chinese labels with purpose annotations.
 
 Single-segment gets 2-3 prompt variants. Multi-segment outputs one prompt per segment.
 
@@ -95,8 +109,23 @@ Director:
     ...
 
   Segment 1 prompt (paste into Seedance):
-    宽高比16:9，时长15秒，电影质感...
-    @图片1 中的咖啡豆在晨光中缓缓滚动...
+    ## Characters + References
+    角色：@图片1 — Coffee beans, golden texture
+    场景参考：@图片2 — Plantation at sunrise
+
+    ## Background
+    A journey from bean to cup, golden hour warmth...
+
+    ## Shot Descriptions
+    镜头1（0-4s）：Macro CU, bean texture, Dolly In
+    镜头2（4-8s）：CU, beans into grinder, Tilt Down
+    ...
+
+    ## Style Directives
+    Cinematic, warm tones, 16:9, 24fps
+
+    ## Negatives
+    No text, watermarks, logos
 
   Operation guide:
     Upload photo → 15s, 16:9 → Generate
@@ -107,7 +136,7 @@ Director:
 
 ```
 skills/seedance-director/
-├── SKILL.md                          # Core workflow (262 lines)
+├── SKILL.md                          # Core workflow (273 lines)
 ├── references/
 │   ├── platform-capabilities.md      # 10 Seedance modes + tech specs + @reference rules
 │   ├── narrative-structures.md       # 5 narrative structures with timing
@@ -116,7 +145,8 @@ skills/seedance-director/
 ├── templates/
 │   ├── single-video.md               # 5 storyboard templates (A-E)
 │   ├── multi-segment.md              # Multi-segment templates for 30s/45s/60s+
-│   └── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV
+│   ├── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV
+│   └── output.html                   # Visual output template (storyboard + prompt viewer)
 └── examples/
     ├── single-examples.md            # 6 complete single-segment examples
     └── multi-examples.md             # 4 complete multi-segment examples
