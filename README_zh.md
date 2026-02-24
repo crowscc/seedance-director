@@ -145,8 +145,7 @@ skills/seedance-director/
 ├── templates/
 │   ├── single-video.md               # 5 种分镜模板（A-E）
 │   ├── multi-segment.md              # 30s/45s/60s+ 多段模板
-│   ├── scene-templates.md            # 电商/仙侠/短剧/科普/MV
-│   └── output.html                   # 可视化输出模板（分镜表 + 提示词查看器）
+│   └── scene-templates.md            # 电商/仙侠/短剧/科普/MV
 └── examples/
     ├── single-examples.md            # 6 个完整单段示例
     └── multi-examples.md             # 4 个完整多段示例

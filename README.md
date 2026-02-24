@@ -145,8 +145,7 @@ skills/seedance-director/
 ├── templates/
 │   ├── single-video.md               # 5 storyboard templates (A-E)
 │   ├── multi-segment.md              # Multi-segment templates for 30s/45s/60s+
-│   ├── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV
-│   └── output.html                   # Visual output template (storyboard + prompt viewer)
+│   └── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV
 └── examples/
     ├── single-examples.md            # 6 complete single-segment examples
     └── multi-examples.md             # 4 complete multi-segment examples

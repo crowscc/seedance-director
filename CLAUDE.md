@@ -21,7 +21,6 @@ Seedance Director 是一个 Agent Skill，帮助用户在即梦（Seedance）AI 
 | `templates/single-video.md` | 单段视频（≤15s） |
 | `templates/multi-segment.md` | 多段视频（>15s） |
 | `templates/scene-templates.md` | 需要场景专属模板时 |
-| `templates/output.html` | Phase 5 输出可视化结果时 |
 | `examples/single-examples.md` | 用户需要单段参考案例 |
 | `examples/multi-examples.md` | 用户需要多段参考案例 |
 
