@@ -1,2 +1,4 @@
 .idea/
 CLAUDE.md
+scripts/.env
+scripts/output/
