@@ -157,6 +157,55 @@ skills/seedance-director/
 
 References are loaded on demand — the core SKILL.md stays lean.
 
+## Doubao AI Generator (Standalone Python Script)
+
+In addition to the Agent Skill workflow, the project includes a standalone Python script that calls the Doubao (豆包) large language model via Volcano Engine to generate storyboards and prompts. Useful for batch generation or integration into your own pipeline.
+
+### Setup
+
+```bash
+cd scripts
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env with your Volcano Engine API Key and Endpoint ID
+```
+
+To get your API Key and Endpoint:
+1. Register at [Volcano Engine](https://www.volcengine.com/) and complete identity verification
+2. Go to [Volcano Ark Console](https://console.volcengine.com/ark) → Key Management → Create API Key
+3. Model Plaza → Select Doubao model (recommended: Doubao-1.5-pro) → Create inference endpoint → Copy Endpoint ID
+
+### Usage
+
+```bash
+# Generate storyboard only
+python doubao_generator.py storyboard --brief "15s heartwarming homecoming, cinematic style"
+
+# Generate Seedance prompt from existing storyboard
+python doubao_generator.py prompt --brief "15s homecoming" --storyboard storyboard.md
+
+# Full pipeline: storyboard + prompt (two-step Doubao calls)
+python doubao_generator.py full --brief "15s coffee brand ad, Xiaohongshu, cozy vibe"
+
+# Stream output (see generation in real-time)
+python doubao_generator.py full --brief "15s coffee brand ad" --stream
+
+# Save to files
+python doubao_generator.py full --brief "15s coffee brand ad" -d output/
+```
+
+The script auto-loads project reference files (vocabulary, templates, examples) as Doubao context, ensuring outputs match Seedance platform format requirements.
+
+### Script Structure
+
+```
+scripts/
+├── doubao_generator.py     # Main script
+├── requirements.txt        # Python dependencies
+├── .env.example            # Environment variable template
+└── .env                    # Your config (git-ignored)
+```
+
 ## Acknowledgments
 
 Inspired by:

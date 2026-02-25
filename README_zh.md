@@ -157,6 +157,55 @@ skills/seedance-director/
 
 参考文件按需加载，核心 SKILL.md 保持精简。
 
+## 豆包 AI 生成器（独立 Python 脚本）
+
+除了 Agent Skill 流程，项目还提供一个独立的 Python 脚本，通过火山引擎调用豆包大模型来生成分镜和提示词。适合需要批量生成或在自己的工作流中集成的场景。
+
+### 配置
+
+```bash
+cd scripts
+pip install -r requirements.txt
+cp .env.example .env
+# 编辑 .env，填入你的火山引擎 API Key 和 Endpoint ID
+```
+
+API Key 和 Endpoint 获取方式：
+1. 注册 [火山引擎](https://www.volcengine.com/) 并完成实名认证
+2. 进入 [火山方舟控制台](https://console.volcengine.com/ark) → 密钥管理 → 创建 API Key
+3. 模型广场 → 选择豆包模型（推荐 Doubao-1.5-pro）→ 创建在线推理接入点 → 获取 Endpoint ID
+
+### 使用
+
+```bash
+# 仅生成分镜脚本
+python doubao_generator.py storyboard --brief "15秒温情回家短片，电影写实风格"
+
+# 根据已有分镜生成即梦提示词
+python doubao_generator.py prompt --brief "15秒温情回家短片" --storyboard storyboard.md
+
+# 一次性生成分镜 + 提示词（两步串联调用豆包）
+python doubao_generator.py full --brief "15秒咖啡品牌广告，小红书，温馨风格"
+
+# 流式输出（实时显示生成过程）
+python doubao_generator.py full --brief "15秒咖啡品牌广告" --stream
+
+# 保存到文件
+python doubao_generator.py full --brief "15秒咖啡品牌广告" -d output/
+```
+
+脚本会自动加载项目中的参考文件（词汇表、模板、示例）作为豆包的上下文，确保生成结果符合 Seedance 平台的格式要求。
+
+### 项目结构
+
+```
+scripts/
+├── doubao_generator.py     # 主脚本
+├── requirements.txt        # Python 依赖
+├── .env.example            # 环境变量模板
+└── .env                    # 你的配置（不入版本控制）
+```
+
 ## 致谢
 
 灵感来自：

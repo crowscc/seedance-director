@@ -1,2 +1,5 @@
 .idea/
 CLAUDE.md
+scripts/.env
+__pycache__/
+*.pyc
