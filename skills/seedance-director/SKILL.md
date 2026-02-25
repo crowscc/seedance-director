@@ -34,6 +34,7 @@ metadata:
 | `templates/scene-templates.md` | 特定场景类型时 | 电商/仙侠/短剧/科普/MV 场景模板 |
 | `examples/single-examples.md` | 需要参考范例时 | 6 个完整单段示例 |
 | `examples/multi-examples.md` | 需要参考范例时 | 4 个完整多段示例 |
+| `templates/output.html` | Phase 5 输出可视化网页时 | 静态 HTML 模板，注入 JSON 数据渲染（见 4.1 节） |
 
 ---
 
@@ -295,3 +296,77 @@ Phase 1-2 完成后，评估素材情况，按需生成缺失的视觉锚定素�
 2. **即梦提示词** — 可直接复制粘贴，固定六板块：角色+参考图 → 背景介绍 → 镜头描述（含说话人） → 声音设计 → 风格指令 → 禁止项
 3. **操作指引** — 素材准备、上传顺序、参数设置、检查要点
 4. **优化建议**（可选） — 替代运镜/转场、色调变体、素材优化、拼接技巧
+
+### 4.1 HTML 可视化输出
+
+Phase 5 完成后，使用 `templates/output.html` 生成可视化网页。该模板是静态 HTML + JS 渲染器，**只需注入 JSON 数据**。
+
+**输出方式**：
+1. 读取 `templates/output.html`
+2. 将 `<script id="project-data" type="application/json">` 标签内的占位内容替换为下方 JSON
+3. 用 Write 工具保存为新文件（如 `output.html`）
+
+**JSON 数据结构**：
+```json
+{
+  "project": {
+    "title": "项目标题",
+    "narrativeStructure": "叙事结构名称",
+    "duration": "总时长，如 45秒",
+    "aspectRatio": "宽高比，如 16:9",
+    "style": "视觉风格，如 电影写实"
+  },
+  "assets": [
+    {
+      "name": "素材名称",
+      "type": "character | scene | keyframe",
+      "purpose": "用途说明",
+      "description": "视觉描述"
+    }
+  ],
+  "segments": [
+    {
+      "number": 1,
+      "title": "第 1 段",
+      "duration": "0-15s",
+      "strategy": "直接生成 | 视频延长",
+      "shots": [
+        {
+          "number": "001",
+          "time": "0-3s",
+          "shotSize": { "zh": "大远景", "en": "Extreme Wide Shot" },
+          "cameraMove": { "zh": "航拍环绕", "en": "Aerial Orbit" },
+          "description": "画面描述",
+          "dialogue": "角色A：「台词」（无则空字符串）",
+          "audio": "音效/音乐描述"
+        }
+      ],
+      "connection": {
+        "label": "段1 → 段2（视频延长）",
+        "description": "衔接操作说明"
+      },
+      "promptSections": {
+        "characterRef": "角色 + 参考图板块内容",
+        "background": "背景介绍板块内容",
+        "shotDescription": "镜头描述板块内容",
+        "soundDesign": "声音设计板块内容",
+        "styleDirective": "风格指令板块内容",
+        "prohibitions": "禁止项板块内容"
+      }
+    }
+  ],
+  "operationGuide": [
+    { "title": "步骤标题", "description": "步骤说明" }
+  ],
+  "tips": [
+    { "title": "建议标题", "description": "建议内容" }
+  ]
+}
+```
+
+**规则**：
+- **只替换 JSON 数据块**，不要修改 HTML/CSS/JS 代码
+- `connection` 仅多段模式的非末段提供，单段模式或末段省略该字段
+- `promptSections` 的 6 个字段与六板块一一对应，不要增删
+- `dialogue` 无台词时填空字符串 `""`，不要填 `"无"`
+- JSON 必须合法（转义双引号、无尾逗号）
