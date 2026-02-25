@@ -22,6 +22,7 @@ import pathlib
 import re
 import sys
 import textwrap
+from typing import Optional
 
 from openai import OpenAI
 
@@ -94,12 +95,17 @@ def _call_stream(
         stream = client.chat.completions.create(**kwargs)
         chunks: list[str] = []
         for chunk in stream:
+            if not chunk.choices:
+                continue
             delta = chunk.choices[0].delta
-            if delta.content:
+            if delta and delta.content:
                 print(delta.content, end="", flush=True)
                 chunks.append(delta.content)
         print()  # 换行
         return "".join(chunks)
+    except KeyboardInterrupt:
+        print("\n\n已中断生成")
+        sys.exit(130)
     except Exception as exc:
         print(f"\n调用豆包 API 失败: {exc}")
         sys.exit(1)
@@ -314,10 +320,18 @@ def _revise_storyboard(
 ) -> str:
     vocabulary = _load_ref("references/vocabulary.md")
 
+    # 按行截断，避免在 markdown 表格行中间切断
+    vocab_lines = vocabulary.splitlines(keepends=True)
+    vocab_truncated = ""
+    for line in vocab_lines:
+        if len(vocab_truncated) + len(line) > 4000:
+            break
+        vocab_truncated += line
+
     system = (
         "你是一位专业的 AI 视频导演。用户对之前的分镜脚本有修改意见，"
         "请根据反馈修改并输出完整的新分镜脚本，保持原有格式。\n\n"
-        f"### 镜头语言参考\n{vocabulary[:4000]}"
+        f"### 镜头语言参考\n{vocab_truncated}"
     )
 
     user_msg = (
@@ -493,7 +507,7 @@ def _generate_prompts(
 # HTML 输出
 # ---------------------------------------------------------------------------
 
-def _extract_json(text: str) -> dict | None:
+def _extract_json(text: str) -> Optional[dict]:
     """从响应文本中提取 JSON 数据。"""
     # 优先查找 ```json ... ``` 代码块
     m = re.search(r"```json\s*(.*?)\s*```", text, re.DOTALL)
@@ -503,18 +517,31 @@ def _extract_json(text: str) -> dict | None:
         except json.JSONDecodeError:
             pass
 
-    # 退而求其次：查找包含 "project" 键的 JSON 对象
-    m = re.search(r'\{[\s\S]*?"project"[\s\S]*\}', text)
-    if m:
-        try:
-            return json.loads(m.group(0))
-        except json.JSONDecodeError:
-            pass
+    # 退而求其次：从包含 "project" 的 { 开始，逐层匹配大括号找到完整 JSON
+    start = text.find('"project"')
+    if start == -1:
+        return None
+    # 向前找到最近的 {
+    brace_start = text.rfind("{", 0, start)
+    if brace_start == -1:
+        return None
+    # 从 brace_start 开始，用括号计数找到匹配的 }
+    depth = 0
+    for i in range(brace_start, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(text[brace_start : i + 1])
+                except json.JSONDecodeError:
+                    return None
 
     return None
 
 
-def _generate_html(data: dict) -> pathlib.Path | None:
+def _generate_html(data: dict) -> Optional[pathlib.Path]:
     """将 JSON 数据注入 HTML 模板并写入 output.html。"""
     template_path = SKILL_DIR / "templates" / "output.html"
     if not template_path.exists():
@@ -537,6 +564,8 @@ def _generate_html(data: dict) -> pathlib.Path | None:
 def main() -> None:
     client = _get_client()
     model = _get_model()
+
+    print(f"\n  使用模型：{model}")
 
     # ── Phase 1-2：收集参数 ──
     params = _collect_params()
@@ -595,4 +624,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\n已退出")
+        sys.exit(130)
+    except EOFError:
+        print("\n\n输入结束，已退出")
+        sys.exit(0)
