@@ -135,9 +135,50 @@ npx skills add https://github.com/crowscc/seedance-director
   [自动在浏览器中打开可视化页面]
 ```
 
+## 独立使用（豆包模型）
+
+除了在 Claude Code 中使用 Agent Skill，你也可以通过 Python 脚本 + 火山引擎豆包模型独立生成分镜和提示词。
+
+### 前置条件
+
+1. 在 [火山引擎控制台](https://console.volcengine.com/ark) 开通模型服务
+2. 创建推理接入点（Endpoint），获取 Endpoint ID（如 `ep-xxxxxxxxxxxx`）
+3. 获取 API Key
+
+### 安装与运行
+
+```bash
+pip install -r requirements.txt
+
+export ARK_API_KEY="your-api-key"
+export ARK_MODEL="ep-xxxxxxxxxxxx"
+
+python doubao_director.py
+```
+
+### 工作流程
+
+脚本会引导你完成以下步骤：
+
+1. **输入创意** — 描述你的视频想法
+2. **选择参数** — 时长、宽高比、叙事结构、风格、声音、素材
+3. **生成分镜** — 豆包生成专业分镜脚本，支持确认 / 重新生成 / 给出修改意见
+4. **生成提示词** — 豆包生成即梦六板块提示词 + 操作指引 + 优化建议
+5. **输出 HTML** — 自动生成可视化页面并在浏览器中打开
+
+### 环境变量
+
+| 变量 | 必填 | 说明 |
+|------|------|------|
+| `ARK_API_KEY` | 是 | 火山引擎 API Key |
+| `ARK_MODEL` | 是 | 推理接入点 Endpoint ID |
+| `ARK_BASE_URL` | 否 | API 地址，默认 `https://ark.cn-beijing.volces.com/api/v3` |
+
 ## 项目结构
 
 ```
+├── doubao_director.py                # 豆包独立脚本（火山引擎 API）
+├── requirements.txt                  # Python 依赖
 skills/seedance-director/
 ├── SKILL.md                          # 核心流程引擎（~410 行）
 ├── references/

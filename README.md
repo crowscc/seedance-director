@@ -135,9 +135,40 @@ Director:
   [Opens visual HTML page in browser]
 ```
 
+## Standalone Usage (Doubao Model)
+
+You can also generate storyboards and prompts independently using the Python script + Volcano Engine Doubao model, without Claude Code.
+
+### Prerequisites
+
+1. Enable model service on [Volcano Engine Console](https://console.volcengine.com/ark)
+2. Create an inference endpoint, get the Endpoint ID (e.g. `ep-xxxxxxxxxxxx`)
+3. Obtain your API Key
+
+### Install & Run
+
+```bash
+pip install -r requirements.txt
+
+export ARK_API_KEY="your-api-key"
+export ARK_MODEL="ep-xxxxxxxxxxxx"
+
+python doubao_director.py
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ARK_API_KEY` | Yes | Volcano Engine API Key |
+| `ARK_MODEL` | Yes | Inference endpoint ID |
+| `ARK_BASE_URL` | No | API URL, defaults to `https://ark.cn-beijing.volces.com/api/v3` |
+
 ## Project Structure
 
 ```
+├── doubao_director.py                # Standalone Doubao script (Volcano Engine API)
+├── requirements.txt                  # Python dependencies
 skills/seedance-director/
 ├── SKILL.md                          # Core workflow engine (~410 lines)
 ├── references/
