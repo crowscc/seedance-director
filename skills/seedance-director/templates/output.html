@@ -277,6 +277,73 @@
   <div id="content"></div>
 </div>
 
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  JSON DATA SCHEMA — 替换下方 <script> 内容，格式必须严格遵守    ║
+  ╚══════════════════════════════════════════════════════════════════╝
+
+  {
+    "project": {
+      "title":              "string  — 项目标题",
+      "narrativeStructure": "string  — 叙事结构名称",
+      "duration":           "string  — 总时长，如 '45秒'",
+      "aspectRatio":        "string  — 宽高比，如 '16:9'",
+      "style":              "string  — 视觉风格，如 '电影写实'"
+    },
+    "assets": [                           // 素材清单（无素材时传空数组 []）
+      {
+        "name":        "string  — 素材名称",
+        "type":        "string  — character | scene | keyframe",
+        "purpose":     "string  — 用途说明",
+        "description": "string? — 视觉描述（可选）"
+      }
+    ],
+    "segments": [                         // 分镜段落（至少 1 段）
+      {
+        "number":   "number  — 段序号，从 1 开始",
+        "title":    "string  — 段标题，如 '第 1 段'",
+        "duration": "string  — 时间范围，如 '0-15s'",
+        "strategy": "string  — 直接生成 | 视频延长",
+        "shots": [                        // 该段所有镜头
+          {
+            "number":     "string  — 镜号，如 '001'",
+            "time":       "string  — 时间，如 '0-3s'",
+            "shotSize":   { "zh": "string", "en": "string" },   // 景别中英双语
+            "cameraMove": { "zh": "string", "en": "string" },   // 运镜中英双语
+            "description":"string  — 画面描述",
+            "dialogue":   "string  — 角色台词（无则空字符串 ''）",
+            "audio":      "string  — 音效/音乐描述"
+          }
+        ],
+        "connection": {                   // 仅多段模式的非末段提供，单段或末段省略
+          "label":       "string  — 如 '段1 → 段2（视频延长）'",
+          "description": "string  — 衔接操作说明"
+        },
+        "promptSections": {               // 六板块，字段不可增删
+          "characterRef":   "string  — 角色 + 参考图",
+          "background":     "string  — 背景介绍",
+          "shotDescription":"string  — 镜头描述",
+          "soundDesign":    "string  — 声音设计",
+          "styleDirective": "string  — 风格指令",
+          "prohibitions":   "string  — 禁止项"
+        }
+      }
+    ],
+    "operationGuide": [                   // 操作步骤
+      { "title": "string", "description": "string" }
+    ],
+    "tips": [                             // 优化建议（可选，无则传空数组 []）
+      { "title": "string", "description": "string" }
+    ]
+  }
+
+  注意事项：
+  • JSON 必须合法（转义双引号、无尾逗号）
+  • dialogue 无台词时填空字符串 ""，不要填 "无"
+  • connection 仅多段非末段提供，单段省略
+  • promptSections 的 6 个字段与六板块一一对应，不可增删
+  • 只替换 JSON 数据块，不要修改 HTML / CSS / JS 代码
+-->
 <script id="project-data" type="application/json">
 {"_placeholder": true}
 </script>
