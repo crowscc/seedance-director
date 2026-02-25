@@ -339,6 +339,7 @@ Phase 5 完成后，使用 `templates/output.html` 生成可视化网页。该�
 1. 读取 `templates/output.html`
 2. 将 `<script id="project-data" type="application/json">` 标签内的占位内容替换为下方 JSON
 3. 用 Write 工具保存为新文件（如 `output.html`）
+4. 用 Bash 工具执行 `open output.html` 在浏览器中打开
 
 **JSON 数据结构**：
 ```json
