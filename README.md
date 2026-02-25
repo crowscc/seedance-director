@@ -19,40 +19,43 @@ Then describe your video idea. Activates on keywords like "Seedance", "即梦", 
 ## Workflow
 
 <p align="center">
-  <img src="assets/workflow.svg" alt="seedance-director workflow" width="700">
+  <img src="assets/workflow_en.svg" alt="seedance-director workflow" width="700">
 </p>
 
 ### Phase 1-2: Understand & Dig
 
 Scans your input for 5 dimensions: **topic**, **duration**, **style**, **assets**, **audio**.
 
-Missing info gets filled via `AskUserQuestion` — options are **dynamically ranked** by relevance to your idea. Say "coffee ad" and narrative structures like "Contrast" and "Process Journey" get prioritized over "Suspense." Up to 3 rounds, then moves on.
+Missing info gets filled via `AskUserQuestion` — options are **dynamically ranked** by relevance (priority: topic > narrative structure > style > duration > assets > audio). Say "coffee ad" and narrative structures like "Contrast" and "AIDA" get prioritized over "Suspense." Up to 3 rounds; remaining dimensions auto-decided.
 
-### Phase 0: Asset Preparation
+Narrative structure is **always discussed** even when most dimensions are clear.
 
-Before any storyboard gets generated, checks what visual references you have. **Have them? Skip. Don't? Generate:**
+### Phase 3: Asset Preparation
 
-- **Character turnaround sheet** — front + side + back views, locks character appearance across all shots
-- **Scene concept art** — locks environment style, lighting, color palette to prevent drift across segments
-- **Key frames** — first frame for each segment, ensures seamless segment-to-segment continuity
+Checks what visual references you have. **Have everything? Auto-skip. Missing something?** You choose:
 
-The director asks via `AskUserQuestion` which assets to generate. You can always provide your own instead.
+- **Generate reference images** — character turnaround sheets, scene concepts, key frames (improves cross-shot consistency)
+- **Skip, go straight to storyboard** — provide your own assets or use text-to-video
 
-### Phase 3: Storyboard
+Multiple assets are generated in **parallel** via subagents.
 
-Generates a professional shot-by-shot storyboard (shot sizes and camera moves labeled in both Chinese and English). Duration determines the generation strategy:
+### Phase 4: Storyboard
+
+Generates a professional shot-by-shot storyboard (shot sizes and camera moves in both Chinese and English).
+
+**Texture-feel decision** happens here — based on content type, platform, and your chosen style, the director decides between **realistic life feel** (handheld, natural light, micro-actions) and **polished production feel** (stabilized, studio lighting, precise framing). Your explicit style choice always overrides platform defaults.
 
 | Duration | Strategy |
 |----------|----------|
 | **≤ 15s** | Single generation |
-| **16-30s** | 2 segments — segment 2 uses **video extension** (extension's sweet spot) |
-| **31s+** | Each segment generated **independently** — uses turnaround sheets + scene art + previous segment's last frame as references. Avoids error propagation and style drift. Assemble in CapCut/editor. |
+| **16-30s** | 2 segments — segment 2 uses **video extension** |
+| **31s+** | Each segment generated **independently** with turnaround sheets + scene art + last-frame references |
 
 Storyboard is confirmed via `AskUserQuestion` before moving on.
 
-### Phase 4: Seedance Prompts
+### Phase 5: Prompts + Operation Guide
 
-Converts confirmed storyboard into **copy-paste-ready prompts** for the Seedance platform. Every prompt follows a fixed **six-section structure**:
+Converts confirmed storyboard into **copy-paste-ready prompts** for Seedance. Every prompt follows a fixed **six-section structure**:
 
 ```
 ## Characters + References
@@ -64,83 +67,79 @@ Converts confirmed storyboard into **copy-paste-ready prompts** for the Seedance
 
 ## Shot Descriptions
   Shot 1 (0-3s): [shot size], [content], Character A: "dialogue", [camera move]
-  Shot 2 (3-6s): ...
+
+## Sound Design
+  BGM: [instruments, rhythm changes]
+  Ambient: [time-stamped sound effects]
+  Dialogue: [voice reference, tone]
 
 ## Style Directives
-  [Unified look: texture, color tone, lighting, depth of field, fps, aspect ratio]
+  [Unified look: texture, color tone, lighting, depth of field]
 
 ## Negatives
   No text, watermarks, logos
 ```
 
-Each character is bound to its own reference image. Dialogue lines always tag the speaker. All @references use Chinese labels with purpose annotations.
+Single-segment outputs 1 recommended version with adjustable directions. Multi-segment outputs one prompt per segment with connection guides.
 
-Single-segment gets 2-3 prompt variants. Multi-segment outputs one prompt per segment.
-
-### Phase 5: Operation Guide
-
-Step-by-step Seedance platform instructions: upload order, parameter settings, segment stitching workflow, post-generation checklist. For 3+ segments, includes CapCut assembly guide.
+After prompts, the director collects feedback via `AskUserQuestion` — adjust specific shots, swap styles, or generate variants. When satisfied, outputs a **visual HTML page** (auto-opens in browser) with the full storyboard, prompts, and operation guide.
 
 ## See It in Action
 
 ```
-You: I want a 30-second coffee brand ad. Cinematic, warm tones. I have 3 product photos.
+You: I want a 15-second coffee product video for Xiaohongshu. Cozy vibe.
 
 Director: [AskUserQuestion] Which narrative structure fits best?
-          > Process Journey — bean to cup, matches your product story ✓
-          > Contrast — before/after, good for taste reveal
+          > AIDA — attention → interest → desire → action, classic for product ✓
+          > Daily Slice — a moment in life, natural and relatable
           > Custom — describe your own
 
-You: Process Journey
+You: AIDA
 
-Director: [AskUserQuestion] You're missing scene references. Generate them?
-          > Generate scene concept art
-          > I'll provide my own
+Director: [AskUserQuestion] Missing product reference. Generate?
+          > ✅ Generate reference images
+          > ⏭ Skip, go straight to prompts
 
-You: Generate scene concept art
+You: Skip
 
 Director:
-  Scene concept prompt → "Coffee plantation at sunrise, golden hour..."
-
-  Storyboard (2 segments, 16:9, cinematic warm):
-    001 | 0-4s  | Macro CU    | Dolly In | Bean texture, golden backlight
-    002 | 4-8s  | Close-Up    | Tilt Down| Beans into grinder
-    003 | 8-12s | Medium Shot | Static   | Pour-over, steam rising
+  Storyboard (single, 9:16, Japanese fresh style):
+    001 | 0-2s  | POV          | Handheld Push | Hand pushes open café door, warm light
+    002 | 2-4s  | Close-Up     | Handheld      | Product on table, shallow DOF
+    003 | 4-6s  | Macro CU     | Slow Push In  | Surface detail, light spots
+    004 | 6-8s  | Medium Shot  | Handheld      | Using product, natural interaction
     ...
 
-  Segment 1 prompt (paste into Seedance):
+  Seedance prompt (paste directly):
     ## Characters + References
-    角色：@图片1 — Coffee beans, golden texture
-    场景参考：@图片2 — Plantation at sunrise
+    @Image1 as product reference
 
     ## Background
-    A journey from bean to cup, golden hour warmth...
+    A warm afternoon in a sunlit café...
 
     ## Shot Descriptions
-    镜头1（0-4s）：Macro CU, bean texture, Dolly In
-    镜头2（4-8s）：CU, beans into grinder, Tilt Down
+    Shot 1 (0-2s): POV, hand pushes open glass door, handheld, slight shake
+    Shot 2 (2-4s): Close-up, product on wooden table, window light
     ...
 
     ## Sound Design
-    BGM: Gentle piano → guitar joins → warm cello peak
-    Ambient: 0-9s keyboard clicks, AC hum; 9-15s birdsong, engine start
+    BGM: Light acoustic guitar, warm and relaxed
+    Ambient: Café chatter, cup clinks, door chime
 
     ## Style Directives
-    Cinematic, warm tones, 16:9, 24fps
+    Japanese fresh, soft natural light, warm tones, shallow DOF
 
     ## Negatives
     No text, watermarks, logos
 
-  Operation guide:
-    Upload photo → 15s, 16:9 → Generate
-    → Screenshot last frame → First-frame ref for segment 2
+  [Opens visual HTML page in browser]
 ```
 
 ## Project Structure
 
 ```
 skills/seedance-director/
-├── SKILL.md                          # Core workflow (273 lines)
+├── SKILL.md                          # Core workflow engine (~410 lines)
 ├── references/
 │   ├── platform-capabilities.md      # 10 Seedance modes + tech specs + @reference rules
 │   ├── narrative-structures.md       # 16 narrative structures with timing & selection guide
@@ -149,7 +148,8 @@ skills/seedance-director/
 ├── templates/
 │   ├── single-video.md               # 5 storyboard templates (A-E)
 │   ├── multi-segment.md              # Multi-segment templates for 30s/45s/60s+
-│   └── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV
+│   ├── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV / Short-video
+│   └── output.html                   # Visual HTML template (static + JSON data injection)
 └── examples/
     ├── single-examples.md            # 6 complete single-segment examples
     └── multi-examples.md             # 4 complete multi-segment examples
