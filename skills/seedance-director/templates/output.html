@@ -351,6 +351,7 @@ function render(data) {
         '<div class="asset-info">' +
           '<h4>' + h(a.name) + '<span class="asset-type">' + h(labels[a.type] || a.type) + '</span></h4>' +
           '<p>' + h(a.purpose) + '</p>' +
+          (a.description ? '<p style="margin-top:4px;font-size:0.72rem;color:var(--text-muted)">' + h(a.description) + '</p>' : '') +
         '</div>';
       grid.appendChild(card);
     });

@@ -240,7 +240,7 @@ Phase 1-2 完成后，评估素材情况，按需生成缺失的视觉锚定素�
 - **2 段**：逐段输出，段2 用视频延长
 - **3 段+**：逐段输出，每段引用三视图 + 场景图 + 末帧截图
 
-**🔀 并行调度**：分镜确认后，各段的提示词 + 操作指引互相独立，使用 Task 工具同时派发多个 subagent 并行生成。每个 agent 接收：该段分镜表、五板块结构模板。每个 agent 需加载 `references/platform-capabilities.md` 获取@引用规范。主 agent 汇总所有结果后统一输出。
+**🔀 并行调度**：分镜确认后，各段的提示词 + 操作指引互相独立，使用 Task 工具同时派发多个 subagent 并行生成。每个 agent 接收：该段分镜表、六板块结构模板。每个 agent 需加载 `references/platform-capabilities.md` 获取@引用规范。主 agent 汇总所有结果后统一输出。
 
 **提示词固定板块结构**（每段提示词都必须包含以下六个板块）：
 ```
@@ -321,7 +321,7 @@ Phase 5 完成后，使用 `templates/output.html` 生成可视化网页。该�
       "name": "素材名称",
       "type": "character | scene | keyframe",
       "purpose": "用途说明",
-      "description": "视觉描述"
+      "description": "视觉描述（可选）"
     }
   ],
   "segments": [

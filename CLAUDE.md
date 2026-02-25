@@ -8,16 +8,17 @@ Seedance Director 是一个 Agent Skill，帮助用户在即梦（Seedance）AI 
 
 ## Architecture
 
-核心引擎是 `skills/seedance-director/SKILL.md`（273行），定义了6阶段工作流和所有交互逻辑。参考文件**按需加载**，不要一次性读取所有文件。
+核心引擎是 `skills/seedance-director/SKILL.md`（372行），定义了5阶段工作流（Phase 1-5）和所有交互逻辑。参考文件**按需加载**，不要一次性读取所有文件。
 
 ### 按需加载矩阵
 
 | 文件 | 何时加载 |
 |------|---------|
-| `references/platform-capabilities.md` | Phase 4 生成提示词时 |
+| `references/platform-capabilities.md` | Phase 5 生成提示词时 |
 | `references/narrative-structures.md` | Phase 2 讨论叙事结构时 |
 | `references/scene-strategies.md` | 场景类型明确后 |
-| `references/vocabulary.md` | Phase 3-4 编写分镜/提示词时 |
+| `references/vocabulary.md` | Phase 4-5 编写分镜/提示词时 |
+| `templates/output.html` | Phase 5 输出可视化页面时 |
 | `templates/single-video.md` | 单段视频（≤15s） |
 | `templates/multi-segment.md` | 多段视频（>15s） |
 | `templates/scene-templates.md` | 需要场景专属模板时 |
@@ -35,7 +36,7 @@ Seedance Director 是一个 Agent Skill，帮助用户在即梦（Seedance）AI 
 
 ```
 skills/seedance-director/
-├── SKILL.md                  # 核心引擎：6阶段工作流 + 交互逻辑（改这里影响全局）
+├── SKILL.md                  # 核心引擎：5阶段工作流 + 交互逻辑（改这里影响全局）
 ├── references/               # 只读知识库：平台能力、叙事结构、场景策略、词汇表
 ├── templates/                # 输出模板：分镜表、提示词格式、HTML可视化
 └── examples/                 # 完整案例：10个可复制的端到端示例
@@ -43,7 +44,7 @@ skills/seedance-director/
 
 ## Editing Guidelines
 
-- 修改 SKILL.md 时注意6阶段的依赖关系（Phase 0-5 顺序固定，但 Phase 0 可跳过）
+- 修改 SKILL.md 时注意5阶段的依赖关系（Phase 1-5 顺序固定）
 - references/ 下的文件是知识库，更新时保持中英双语对照格式
 - vocabulary.md 的9大分类结构（景别、运镜、角度、转场、节奏、风格、色调、光影、情绪）不要打乱
 - templates/ 中的分镜模板（A-E）各有独立场景定位，新增模板用新字母编号
