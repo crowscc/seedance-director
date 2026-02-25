@@ -137,13 +137,12 @@ npx skills add https://github.com/crowscc/seedance-director
 
 ## 独立使用（豆包模型）
 
-除了在 Claude Code 中使用 Agent Skill，你也可以通过 Python 脚本 + 火山引擎豆包模型独立生成分镜和提示词。
+除了在 Claude Code 中使用 Agent Skill，你也可以通过 Python 脚本 + 火山引擎豆包模型独立生成分镜和提示词。默认使用 `doubao-seed-2-0-pro-260215` 模型。
 
 ### 前置条件
 
-1. 在 [火山引擎控制台](https://console.volcengine.com/ark) 开通模型服务
-2. 创建推理接入点（Endpoint），获取 Endpoint ID（如 `ep-xxxxxxxxxxxx`）
-3. 获取 API Key
+1. 在 [火山引擎控制台](https://console.volcengine.com/ark) 开通模型服务并获取 API Key
+2. 确保账户已开通 `doubao-seed-2-0-pro-260215` 模型权限
 
 ### 安装与运行
 
@@ -151,7 +150,6 @@ npx skills add https://github.com/crowscc/seedance-director
 pip install -r requirements.txt
 
 export ARK_API_KEY="your-api-key"
-export ARK_MODEL="ep-xxxxxxxxxxxx"
 
 python doubao_director.py
 ```
@@ -171,7 +169,7 @@ python doubao_director.py
 | 变量 | 必填 | 说明 |
 |------|------|------|
 | `ARK_API_KEY` | 是 | 火山引擎 API Key |
-| `ARK_MODEL` | 是 | 推理接入点 Endpoint ID |
+| `ARK_MODEL` | 否 | 模型名称，默认 `doubao-seed-2-0-pro-260215` |
 | `ARK_BASE_URL` | 否 | API 地址，默认 `https://ark.cn-beijing.volces.com/api/v3` |
 
 ## 项目结构

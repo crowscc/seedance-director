@@ -2,11 +2,14 @@
 """
 Seedance Director — 豆包 AI 视频导演
 
-使用火山引擎豆包模型，交互式生成即梦平台的分镜脚本和提示词。
+使用火山引擎豆包模型（doubao-seed-2-0-pro-260215），交互式生成即梦平台的分镜脚本和提示词。
 
 使用前请设置环境变量：
   export ARK_API_KEY="your-api-key"
-  export ARK_MODEL="ep-xxxxxxxxxxxx"   # 火山引擎控制台创建的推理接入点 ID
+
+可选环境变量：
+  export ARK_MODEL="doubao-seed-2-0-pro-260215"   # 默认值，可改为其他模型
+  export ARK_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"  # 默认值
 
 运行：
   pip install -r requirements.txt
@@ -28,6 +31,9 @@ from openai import OpenAI
 SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR / "skills" / "seedance-director"
 
+DEFAULT_MODEL = "doubao-seed-2-0-pro-260215"
+DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
+
 # ---------------------------------------------------------------------------
 # 客户端
 # ---------------------------------------------------------------------------
@@ -40,21 +46,12 @@ def _get_client() -> OpenAI:
         print()
         print("获取方式：https://console.volcengine.com/ark")
         sys.exit(1)
-    base_url = os.environ.get(
-        "ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"
-    )
+    base_url = os.environ.get("ARK_BASE_URL", DEFAULT_BASE_URL)
     return OpenAI(api_key=api_key, base_url=base_url)
 
 
 def _get_model() -> str:
-    model = os.environ.get("ARK_MODEL")
-    if not model:
-        print("错误：请设置环境变量 ARK_MODEL（推理接入点 Endpoint ID）")
-        print("  export ARK_MODEL=ep-xxxxxxxxxxxx")
-        print()
-        print("在火山引擎控制台 → 模型推理 → 创建推理接入点获取")
-        sys.exit(1)
-    return model
+    return os.environ.get("ARK_MODEL", DEFAULT_MODEL)
 
 
 # ---------------------------------------------------------------------------
@@ -73,39 +70,28 @@ def _load_ref(relpath: str) -> str:
 # 调用豆包 API
 # ---------------------------------------------------------------------------
 
-def _call(
-    client: OpenAI,
-    model: str,
-    messages: list[dict],
-    temperature: float = 0.7,
-) -> str:
-    """调用豆包 API，返回文本。"""
-    try:
-        resp = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-        )
-        return resp.choices[0].message.content
-    except Exception as exc:
-        print(f"\n调用豆包 API 失败: {exc}")
-        sys.exit(1)
-
-
 def _call_stream(
     client: OpenAI,
     model: str,
     messages: list[dict],
     temperature: float = 0.7,
 ) -> str:
-    """流式调用豆包 API，实时打印并返回完整文本。"""
+    """流式调用豆包 API，实时打印并返回完整文本。
+
+    自动为 doubao-seed-2-0 系列模型关闭深度思考（thinking disabled），
+    因为分镜/提示词生成属于创意写作而非推理任务。
+    """
+    kwargs: dict = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "stream": True,
+    }
+    # doubao-seed-2-0 系列支持 thinking 参数；关闭深度思考以减少延迟
+    if "seed-2" in model:
+        kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
     try:
-        stream = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            stream=True,
-        )
+        stream = client.chat.completions.create(**kwargs)
         chunks: list[str] = []
         for chunk in stream:
             delta = chunk.choices[0].delta

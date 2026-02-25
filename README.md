@@ -137,13 +137,12 @@ Director:
 
 ## Standalone Usage (Doubao Model)
 
-You can also generate storyboards and prompts independently using the Python script + Volcano Engine Doubao model, without Claude Code.
+You can also generate storyboards and prompts independently using the Python script + Volcano Engine Doubao model, without Claude Code. Defaults to `doubao-seed-2-0-pro-260215`.
 
 ### Prerequisites
 
-1. Enable model service on [Volcano Engine Console](https://console.volcengine.com/ark)
-2. Create an inference endpoint, get the Endpoint ID (e.g. `ep-xxxxxxxxxxxx`)
-3. Obtain your API Key
+1. Enable model service on [Volcano Engine Console](https://console.volcengine.com/ark) and obtain your API Key
+2. Ensure your account has access to the `doubao-seed-2-0-pro-260215` model
 
 ### Install & Run
 
@@ -151,7 +150,6 @@ You can also generate storyboards and prompts independently using the Python scr
 pip install -r requirements.txt
 
 export ARK_API_KEY="your-api-key"
-export ARK_MODEL="ep-xxxxxxxxxxxx"
 
 python doubao_director.py
 ```
@@ -161,7 +159,7 @@ python doubao_director.py
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `ARK_API_KEY` | Yes | Volcano Engine API Key |
-| `ARK_MODEL` | Yes | Inference endpoint ID |
+| `ARK_MODEL` | No | Model name, defaults to `doubao-seed-2-0-pro-260215` |
 | `ARK_BASE_URL` | No | API URL, defaults to `https://ark.cn-beijing.volces.com/api/v3` |
 
 ## Project Structure
