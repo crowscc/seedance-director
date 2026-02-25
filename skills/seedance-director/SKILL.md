@@ -333,75 +333,28 @@ options:
 
 ### 4.1 HTML 可视化输出
 
-Phase 5 完成后，使用 `templates/output.html` 生成可视化网页。该模板是静态 HTML + JS 渲染器，**只需注入 JSON 数据**。
+Phase 5 完成后，使用 Task 工具派发一个**独立 subagent** 生成可视化网页。模板 `templates/output.html` 是静态 HTML + JS 渲染器，内嵌了完整的 JSON Schema 注释，**subagent 读取模板即可获知数据格式**。
 
-**输出方式**：
-1. 读取 `templates/output.html`
-2. 将 `<script id="project-data" type="application/json">` 标签内的占位内容替换为下方 JSON
-3. 用 Write 工具保存为新文件（如 `output.html`）
-4. 用 Bash 工具执行 `open output.html` 在浏览器中打开
+**主 agent 职责**：
+1. 将 Phase 5 的全部成果（分镜、提示词、操作指引、优化建议）组装为 JSON 数据
+2. 通过 Task 工具派发 subagent，传递以下信息：
+   - 模板文件路径：`templates/output.html`（相对于 skill 目录）
+   - 完整的 JSON 数据（直接嵌入 prompt）
+   - 输出文件路径：`output.html`（工作目录下）
 
-**JSON 数据结构**：
-```json
-{
-  "project": {
-    "title": "项目标题",
-    "narrativeStructure": "叙事结构名称",
-    "duration": "总时长，如 45秒",
-    "aspectRatio": "宽高比，如 16:9",
-    "style": "视觉风格，如 电影写实"
-  },
-  "assets": [
-    {
-      "name": "素材名称",
-      "type": "character | scene | keyframe",
-      "purpose": "用途说明",
-      "description": "视觉描述（可选）"
-    }
-  ],
-  "segments": [
-    {
-      "number": 1,
-      "title": "第 1 段",
-      "duration": "0-15s",
-      "strategy": "直接生成 | 视频延长",
-      "shots": [
-        {
-          "number": "001",
-          "time": "0-3s",
-          "shotSize": { "zh": "大远景", "en": "Extreme Wide Shot" },
-          "cameraMove": { "zh": "航拍环绕", "en": "Aerial Orbit" },
-          "description": "画面描述",
-          "dialogue": "角色A：「台词」（无则空字符串）",
-          "audio": "音效/音乐描述"
-        }
-      ],
-      "connection": {
-        "label": "段1 → 段2（视频延长）",
-        "description": "衔接操作说明"
-      },
-      "promptSections": {
-        "characterRef": "角色 + 参考图板块内容",
-        "background": "背景介绍板块内容",
-        "shotDescription": "镜头描述板块内容",
-        "soundDesign": "声音设计板块内容",
-        "styleDirective": "风格指令板块内容",
-        "prohibitions": "禁止项板块内容"
-      }
-    }
-  ],
-  "operationGuide": [
-    { "title": "步骤标题", "description": "步骤说明" }
-  ],
-  "tips": [
-    { "title": "建议标题", "description": "建议内容" }
-  ]
-}
+**subagent prompt 模板**：
+```
+读取 {skill目录}/templates/output.html 模板文件。
+将 <script id="project-data" type="application/json"> 标签内的占位内容替换为以下 JSON 数据。
+只替换 JSON 数据块，不要修改 HTML/CSS/JS 代码。
+用 Write 工具保存为 output.html，然后用 Bash 工具执行 `open output.html` 在浏览器中打开。
+
+JSON 数据：
+{此处粘贴完整 JSON}
 ```
 
-**规则**：
-- **只替换 JSON 数据块**，不要修改 HTML/CSS/JS 代码
+**JSON 数据格式**：参见模板文件 `<script id="project-data">` 上方的 Schema 注释。主 agent 组装 JSON 时遵守以下规则：
 - `connection` 仅多段模式的非末段提供，单段模式或末段省略该字段
-- `promptSections` 的 6 个字段与六板块一一对应，不要增删
+- `promptSections` 的 6 个字段与六板块一一对应，不可增删
 - `dialogue` 无台词时填空字符串 `""`，不要填 `"无"`
 - JSON 必须合法（转义双引号、无尾逗号）
