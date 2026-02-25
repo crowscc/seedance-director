@@ -144,7 +144,7 @@ skills/seedance-director/
 ├── references/
 │   ├── platform-capabilities.md      # 10 Seedance modes + tech specs + @reference rules
 │   ├── narrative-structures.md       # 16 narrative structures with timing & selection guide
-│   ├── scene-strategies.md           # 5 scene-type strategies with full prompt examples
+│   ├── scene-strategies.md           # 6 scene-type strategies with full prompt examples
 │   └── vocabulary.md                 # Camera + visual style bilingual vocabulary
 ├── templates/
 │   ├── single-video.md               # 5 storyboard templates (A-E)

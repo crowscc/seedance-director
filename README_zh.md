@@ -144,7 +144,7 @@ skills/seedance-director/
 ├── references/
 │   ├── platform-capabilities.md      # 即梦 10 种模式 + 技术参数 + @引用规范
 │   ├── narrative-structures.md       # 16 种叙事结构及时间分配 + 选择指南
-│   ├── scene-strategies.md           # 5 类场景策略及完整提示词示例
+│   ├── scene-strategies.md           # 6 类场景策略及完整提示词示例
 │   └── vocabulary.md                 # 镜头语言 + 视觉风格双语词汇表
 ├── templates/
 │   ├── single-video.md               # 5 种分镜模板（A-E）
