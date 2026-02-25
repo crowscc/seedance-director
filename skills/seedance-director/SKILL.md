@@ -4,10 +4,61 @@ description: Guides users through AI video production on the Seedance (即梦) p
 license: MIT
 metadata:
   author: seedance-director
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Seedance Director — AI 视频导演
+
+## 0. 豆包 AI 集成（doubao-seed-2-0-pro-260215）
+
+项目提供 Python 脚本 `scripts/doubao_generator.py`，通过火山引擎 OpenAI 兼容接口调用豆包 Seed 2.0 Pro 模型。**在 Phase 4（分镜生成）和 Phase 5（提示词生成）时调用**，其余阶段仍由你（主 agent）直接处理。
+
+### 前置条件
+
+用户需在环境变量或 `scripts/.env` 中设置 `ARK_API_KEY`。使用前用 Bash 检查：
+
+```bash
+python3 -c "from openai import OpenAI; print('openai OK')" 2>/dev/null || pip install openai
+```
+
+### 调用方式
+
+**Phase 4 — 生成分镜脚本**：
+将 Phase 1-3 收集的完整创意简报（主题、时长、风格、叙事结构、素材、声音等）组装为一段文字描述，通过 Bash 工具调用：
+
+```bash
+cd {项目根目录} && python3 scripts/doubao_generator.py storyboard --brief "创意简报完整内容"
+```
+
+脚本会自动加载参考文件（词汇表、模板、示例）注入豆包的 system prompt，返回的分镜脚本输出到 stdout。你拿到输出后：
+1. 展示给用户
+2. 用 `AskUserQuestion` 确认或调整
+3. 如用户要求调整，可修改 brief 重新调用，或直接手动修改分镜
+
+**Phase 5 — 生成即梦提示词**：
+先将确认后的分镜保存为临时文件，再调用：
+
+```bash
+cd {项目根目录} && python3 scripts/doubao_generator.py prompt --brief "创意简报" --storyboard-file /tmp/storyboard.md
+```
+
+返回的即梦提示词 + 操作指引输出到 stdout。
+
+**一步到位模式**（可选，适合简单需求）：
+```bash
+cd {项目根目录} && python3 scripts/doubao_generator.py full --brief "创意简报" -d /tmp/output/
+```
+
+stdout 输出用 `===STORYBOARD===` 和 `===PROMPT===` 分隔两段内容。
+
+### 注意事项
+
+- 如果 `ARK_API_KEY` 未设置，脚本会报错退出 — 此时降级为由你直接生成（与以前的行为一致）
+- 脚本默认使用模型 `doubao-seed-2-0-pro-260215`，可通过 `ARK_MODEL` 环境变量覆盖
+- Phase 1-3（创意理解、深度挖掘、素材制备）仍由你直接处理，不调用豆包
+- 豆包生成的内容仍需经过你的审查和用户确认，不要盲目原样输出
+
+---
 
 ## 1. 角色定义
 
@@ -206,6 +257,8 @@ options:
 
 ### Phase 4: 生成分镜脚本
 
+**🤖 豆包 AI 调用**：此阶段调用豆包生成分镜（详见第 0 节）。将 Phase 1-3 确定的所有信息组装为创意简报，通过 Bash 调用 `scripts/doubao_generator.py storyboard`。如果调用失败（API Key 未设置、网络问题等），降级为由你直接生成。
+
 **质感取向前置判断**：生成分镜前，根据内容类型、目标平台和用户选择的视觉风格确定质感取向（真实生活感 / 精致制作感 / 混合）。判断逻辑见 Phase 5「活人感判断」表，但**用户在 Phase 2 显式选择的风格优先**（如用户为抖音视频选了"电影写实"，则按精致制作感设计分镜，不因平台覆盖）。质感取向直接影响分镜中的运镜（手持 vs 稳定器）、光线（自然光 vs 专业布光）、构图（随意 vs 精确）选择。
 
 **即梦生成时长固定为 15s**：即梦每次生成的视频统一为 15 秒。每个提示词对应一个 15s 片段，内含多个分镜（如镜头1: 0-3s → 镜头2: 3-7s → 镜头3: 7-12s → 镜头4: 12-15s）。多段视频通过即梦的**视频延长**功能衔接，充分利用视频模型能力，不依赖外部剪辑软件。
@@ -262,6 +315,8 @@ options:
 输出全部分镜后，使用 `AskUserQuestion` 确认。options 动态生成 — 始终包含「满意，继续生成提示词」，其余选项根据分镜复杂度和可能的调整点生成（如「调整第 N 镜的运镜」「修改段间衔接」「整体节奏偏快/偏慢」等具体建议）。
 
 ### Phase 5: 生成即梦提示词 + 操作指引
+
+**🤖 豆包 AI 调用**：此阶段调用豆包生成提示词（详见第 0 节）。将确认后的分镜脚本保存为临时文件，通过 Bash 调用 `scripts/doubao_generator.py prompt`。如果调用失败，降级为由你直接生成。
 
 加载 `references/platform-capabilities.md` 获取模式选择和@引用规范。
 

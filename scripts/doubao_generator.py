@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
 """
-Seedance Director — 豆包 AI 分镜 & 提示词生成器
+Seedance Director — 豆包 Seed 2.0 Pro 分镜 & 提示词生成器
 
-通过火山引擎调用豆包大模型，在特定阶段生成：
-  1. 分镜脚本（Phase 4）
-  2. 即梦平台提示词（Phase 5）
+通过火山引擎 OpenAI 兼容接口调用 doubao-seed-2-0-pro-260215，
+由 Skill（SKILL.md）在 Phase 4/5 通过 Bash 工具调用。
 
-使用方式：
-  python doubao_generator.py --help
-  python doubao_generator.py storyboard --brief "15秒温情回家短片，电影写实风格"
-  python doubao_generator.py prompt --brief "15秒温情回家短片" --storyboard storyboard.md
-  python doubao_generator.py full --brief "15秒咖啡品牌广告，小红书，温馨风格"
+调用方式（由 Skill 自动执行）：
+  python doubao_generator.py storyboard --brief "创意简报内容"
+  python doubao_generator.py prompt --brief "创意简报" --storyboard-file storyboard.md
+  python doubao_generator.py full --brief "创意简报" -d output/
 """
 
 import argparse
-import json
 import os
 import sys
 from pathlib import Path
-
-from dotenv import load_dotenv
 
 # ---------------------------------------------------------------------------
 # 路径常量
@@ -30,6 +25,12 @@ SKILL_DIR = PROJECT_ROOT / "skills" / "seedance-director"
 REFERENCES_DIR = SKILL_DIR / "references"
 TEMPLATES_DIR = SKILL_DIR / "templates"
 EXAMPLES_DIR = SKILL_DIR / "examples"
+
+# ---------------------------------------------------------------------------
+# 模型配置
+# ---------------------------------------------------------------------------
+DEFAULT_MODEL = "doubao-seed-2-0-pro-260215"
+BASE_URL = "https://ark.cn-beijing.volces.com/api/compatible/v1"
 
 
 # ---------------------------------------------------------------------------
@@ -71,36 +72,37 @@ def load_multi_examples() -> str:
 
 
 # ---------------------------------------------------------------------------
-# 豆包客户端
+# 豆包客户端（OpenAI 兼容接口）
 # ---------------------------------------------------------------------------
 class DoubaoClient:
-    """火山引擎方舟平台豆包大模型客户端。"""
+    """通过 OpenAI 兼容接口调用豆包 Seed 2.0 Pro。"""
 
-    def __init__(self, api_key: str | None = None, endpoint: str | None = None):
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str | None = None,
+    ):
         try:
-            from volcenginesdkarkruntime import Ark
+            from openai import OpenAI
         except ImportError:
             sys.exit(
-                "错误：缺少依赖 volcenginesdkarkruntime\n"
-                "请执行: pip install volcenginesdkarkruntime"
+                "错误：缺少依赖 openai\n"
+                "请执行: pip install openai"
             )
 
         self.api_key = api_key or os.getenv("ARK_API_KEY", "")
-        self.endpoint = endpoint or os.getenv("ARK_MODEL_ENDPOINT", "")
+        self.model = model or os.getenv("ARK_MODEL", DEFAULT_MODEL)
 
         if not self.api_key:
             sys.exit(
                 "错误：未设置 ARK_API_KEY\n"
-                "请在 .env 文件或环境变量中设置"
-            )
-        if not self.endpoint:
-            sys.exit(
-                "错误：未设置 ARK_MODEL_ENDPOINT\n"
-                "请在 .env 文件或环境变量中设置"
+                "请在环境变量中设置，或在 scripts/.env 文件中配置"
             )
 
-        os.environ["ARK_API_KEY"] = self.api_key
-        self.client = Ark(base_url="https://ark.cn-beijing.volces.com/api/v3")
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=BASE_URL,
+        )
 
     def chat(
         self,
@@ -121,7 +123,7 @@ class DoubaoClient:
             return self._stream_chat(messages, temperature, max_tokens)
 
         completion = self.client.chat.completions.create(
-            model=self.endpoint,
+            model=self.model,
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -134,9 +136,9 @@ class DoubaoClient:
         temperature: float,
         max_tokens: int,
     ) -> str:
-        """流式调用，实时打印并返回完整回复。"""
+        """流式调用，实时输出到 stderr（stdout 保留给结构化输出）。"""
         stream = self.client.chat.completions.create(
-            model=self.endpoint,
+            model=self.model,
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -148,9 +150,10 @@ class DoubaoClient:
                 continue
             delta = chunk.choices[0].delta.content
             if delta:
-                print(delta, end="", flush=True)
+                sys.stderr.write(delta)
+                sys.stderr.flush()
                 parts.append(delta)
-        print()  # 换行
+        sys.stderr.write("\n")
         return "".join(parts)
 
 
@@ -357,63 +360,52 @@ def generate_full(
     *,
     stream: bool = False,
 ) -> tuple[str, str]:
-    """一次性生成分镜 + 提示词（两步调用）。"""
-    print("=" * 60)
-    print("📋 第一步：生成分镜脚本")
-    print("=" * 60)
+    """两步串联：先生成分镜，再转化为提示词。"""
+    sys.stderr.write(">>> 第一步：调用豆包生成分镜脚本...\n")
     storyboard = generate_storyboard(client, brief, stream=stream)
-    if not stream:
-        print(storyboard)
 
-    print()
-    print("=" * 60)
-    print("🎬 第二步：生成即梦提示词 + 操作指引")
-    print("=" * 60)
+    sys.stderr.write("\n>>> 第二步：调用豆包生成即梦提示词 + 操作指引...\n")
     prompt = generate_prompt(client, brief, storyboard, stream=stream)
-    if not stream:
-        print(prompt)
 
     return storyboard, prompt
 
 
 # ---------------------------------------------------------------------------
-# CLI
+# CLI — 供 Skill 通过 Bash 工具调用
 # ---------------------------------------------------------------------------
 def main():
-    load_dotenv(SCRIPT_DIR / ".env")
+    # 支持从 scripts/.env 加载环境变量
+    env_file = SCRIPT_DIR / ".env"
+    if env_file.is_file():
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(env_file)
+        except ImportError:
+            pass  # dotenv 可选，环境变量也可以直接设置
 
     parser = argparse.ArgumentParser(
-        description="Seedance Director — 豆包 AI 分镜 & 提示词生成器",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "示例:\n"
-            '  python doubao_generator.py storyboard --brief "15秒温情回家短片，电影写实风格"\n'
-            '  python doubao_generator.py prompt --brief "15秒温情回家短片" --storyboard storyboard.md\n'
-            '  python doubao_generator.py full --brief "15秒咖啡品牌广告，小红书，温馨风格"\n'
-        ),
+        description="豆包 Seed 2.0 Pro — 分镜 & 提示词生成器（供 Skill 调用）",
     )
     subparsers = parser.add_subparsers(dest="command", help="生成模式")
 
-    # --- storyboard ---
-    sp_sb = subparsers.add_parser("storyboard", help="仅生成分镜脚本")
-    sp_sb.add_argument("--brief", required=True, help="创意简报（描述你想要的视频）")
-    sp_sb.add_argument("--output", "-o", help="输出文件路径（默认打印到终端）")
-    sp_sb.add_argument("--stream", action="store_true", help="流式输出")
+    # --- storyboard: 生成分镜脚本 ---
+    sp_sb = subparsers.add_parser("storyboard", help="生成分镜脚本（Phase 4）")
+    sp_sb.add_argument("--brief", required=True, help="创意简报")
+    sp_sb.add_argument("--output", "-o", help="保存到文件")
+    sp_sb.add_argument("--stream", action="store_true", help="流式输出到 stderr")
 
-    # --- prompt ---
-    sp_pr = subparsers.add_parser("prompt", help="根据分镜生成即梦提示词")
+    # --- prompt: 根据分镜生成即梦提示词 ---
+    sp_pr = subparsers.add_parser("prompt", help="生成即梦提示词（Phase 5）")
     sp_pr.add_argument("--brief", required=True, help="创意简报")
-    sp_pr.add_argument(
-        "--storyboard", required=True, help="分镜脚本文件路径（.md）"
-    )
-    sp_pr.add_argument("--output", "-o", help="输出文件路径")
-    sp_pr.add_argument("--stream", action="store_true", help="流式输出")
+    sp_pr.add_argument("--storyboard-file", required=True, help="分镜脚本文件路径")
+    sp_pr.add_argument("--output", "-o", help="保存到文件")
+    sp_pr.add_argument("--stream", action="store_true", help="流式输出到 stderr")
 
-    # --- full ---
-    sp_full = subparsers.add_parser("full", help="一次性生成分镜 + 提示词")
+    # --- full: 一次性生成分镜 + 提示词 ---
+    sp_full = subparsers.add_parser("full", help="分镜 + 提示词（Phase 4+5）")
     sp_full.add_argument("--brief", required=True, help="创意简报")
-    sp_full.add_argument("--output-dir", "-d", help="输出目录（保存分镜和提示词文件）")
-    sp_full.add_argument("--stream", action="store_true", help="流式输出")
+    sp_full.add_argument("--output-dir", "-d", help="输出目录")
+    sp_full.add_argument("--stream", action="store_true", help="流式输出到 stderr")
 
     args = parser.parse_args()
 
@@ -425,31 +417,32 @@ def main():
 
     if args.command == "storyboard":
         result = generate_storyboard(client, args.brief, stream=args.stream)
-        if not args.stream:
-            print(result)
+        print(result)
         if args.output:
             Path(args.output).write_text(result, encoding="utf-8")
-            print(f"\n✅ 分镜脚本已保存到: {args.output}")
+            sys.stderr.write(f"已保存到: {args.output}\n")
 
     elif args.command == "prompt":
-        sb_text = Path(args.storyboard).read_text(encoding="utf-8")
+        sb_text = Path(args.storyboard_file).read_text(encoding="utf-8")
         result = generate_prompt(client, args.brief, sb_text, stream=args.stream)
-        if not args.stream:
-            print(result)
+        print(result)
         if args.output:
             Path(args.output).write_text(result, encoding="utf-8")
-            print(f"\n✅ 即梦提示词已保存到: {args.output}")
+            sys.stderr.write(f"已保存到: {args.output}\n")
 
     elif args.command == "full":
         storyboard, prompt = generate_full(client, args.brief, stream=args.stream)
+        # stdout 输出用分隔符分开，方便 Skill 解析
+        print("===STORYBOARD===")
+        print(storyboard)
+        print("===PROMPT===")
+        print(prompt)
         if args.output_dir:
             out = Path(args.output_dir)
             out.mkdir(parents=True, exist_ok=True)
             (out / "storyboard.md").write_text(storyboard, encoding="utf-8")
             (out / "seedance-prompt.md").write_text(prompt, encoding="utf-8")
-            print(f"\n✅ 文件已保存到: {out}/")
-            print(f"   - storyboard.md     (分镜脚本)")
-            print(f"   - seedance-prompt.md (即梦提示词 + 操作指引)")
+            sys.stderr.write(f"已保存到: {out}/\n")
 
 
 if __name__ == "__main__":

@@ -157,51 +157,64 @@ skills/seedance-director/
 
 References are loaded on demand — the core SKILL.md stays lean.
 
-## Doubao AI Generator (Standalone Python Script)
+## Doubao AI Integration (Seed 2.0 Pro)
 
-In addition to the Agent Skill workflow, the project includes a standalone Python script that calls the Doubao (豆包) large language model via Volcano Engine to generate storyboards and prompts. Useful for batch generation or integration into your own pipeline.
+The skill automatically calls the Doubao `doubao-seed-2-0-pro-260215` model via Volcano Engine's OpenAI-compatible API during Phase 4 (storyboard) and Phase 5 (prompt generation). Other phases (creative understanding, exploration, asset prep) are handled directly by Claude.
 
 ### Setup
 
 ```bash
 cd scripts
-pip install -r requirements.txt
+pip install -r requirements.txt   # Install openai SDK
 cp .env.example .env
-# Edit .env with your Volcano Engine API Key and Endpoint ID
+# Edit .env with your ARK_API_KEY
 ```
 
-To get your API Key and Endpoint:
+To get your API Key:
 1. Register at [Volcano Engine](https://www.volcengine.com/) and complete identity verification
 2. Go to [Volcano Ark Console](https://console.volcengine.com/ark) → Key Management → Create API Key
-3. Model Plaza → Select Doubao model (recommended: Doubao-1.5-pro) → Create inference endpoint → Copy Endpoint ID
+3. Online Inference → Preset Inference Endpoints → Find `doubao-seed-2-0-pro-260215` → Enable Model
 
-### Usage
+### Automatic Skill Integration
+
+Once the API Key is configured, the skill automatically calls the script via Bash during Phase 4/5:
 
 ```bash
-# Generate storyboard only
-python doubao_generator.py storyboard --brief "15s heartwarming homecoming, cinematic style"
+# Phase 4: Generate storyboard
+python3 scripts/doubao_generator.py storyboard --brief "creative brief"
 
-# Generate Seedance prompt from existing storyboard
-python doubao_generator.py prompt --brief "15s homecoming" --storyboard storyboard.md
+# Phase 5: Generate Seedance prompt
+python3 scripts/doubao_generator.py prompt --brief "creative brief" --storyboard-file /tmp/storyboard.md
 
-# Full pipeline: storyboard + prompt (two-step Doubao calls)
-python doubao_generator.py full --brief "15s coffee brand ad, Xiaohongshu, cozy vibe"
-
-# Stream output (see generation in real-time)
-python doubao_generator.py full --brief "15s coffee brand ad" --stream
-
-# Save to files
-python doubao_generator.py full --brief "15s coffee brand ad" -d output/
+# Full pipeline (storyboard + prompt)
+python3 scripts/doubao_generator.py full --brief "creative brief" -d /tmp/output/
 ```
 
-The script auto-loads project reference files (vocabulary, templates, examples) as Doubao context, ensuring outputs match Seedance platform format requirements.
+If the API Key is not configured or the call fails, it gracefully falls back to Claude generating directly.
+
+### Standalone Usage
+
+```bash
+cd scripts
+
+# Generate storyboard only
+python3 doubao_generator.py storyboard --brief "15s heartwarming homecoming, cinematic style"
+
+# Generate Seedance prompt from existing storyboard
+python3 doubao_generator.py prompt --brief "15s homecoming" --storyboard-file storyboard.md
+
+# Full pipeline with streaming
+python3 doubao_generator.py full --brief "15s coffee brand ad, cozy vibe" --stream
+```
+
+The script auto-loads project reference files (vocabulary, templates, examples) as Doubao context, ensuring outputs match Seedance platform format.
 
 ### Script Structure
 
 ```
 scripts/
-├── doubao_generator.py     # Main script
-├── requirements.txt        # Python dependencies
+├── doubao_generator.py     # Main script (called by Skill via Bash)
+├── requirements.txt        # Python dependencies (openai, python-dotenv)
 ├── .env.example            # Environment variable template
 └── .env                    # Your config (git-ignored)
 ```

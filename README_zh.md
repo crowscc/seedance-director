@@ -157,51 +157,64 @@ skills/seedance-director/
 
 参考文件按需加载，核心 SKILL.md 保持精简。
 
-## 豆包 AI 生成器（独立 Python 脚本）
+## 豆包 AI 集成（Seed 2.0 Pro）
 
-除了 Agent Skill 流程，项目还提供一个独立的 Python 脚本，通过火山引擎调用豆包大模型来生成分镜和提示词。适合需要批量生成或在自己的工作流中集成的场景。
+Skill 在 Phase 4（分镜）和 Phase 5（提示词）阶段自动调用豆包 `doubao-seed-2-0-pro-260215` 模型，通过火山引擎 OpenAI 兼容接口。其余阶段（创意理解、深度挖掘、素材制备）仍由 Claude 直接处理。
 
 ### 配置
 
 ```bash
 cd scripts
-pip install -r requirements.txt
+pip install -r requirements.txt   # 安装 openai SDK
 cp .env.example .env
-# 编辑 .env，填入你的火山引擎 API Key 和 Endpoint ID
+# 编辑 .env，填入你的 ARK_API_KEY
 ```
 
-API Key 和 Endpoint 获取方式：
+API Key 获取方式：
 1. 注册 [火山引擎](https://www.volcengine.com/) 并完成实名认证
 2. 进入 [火山方舟控制台](https://console.volcengine.com/ark) → 密钥管理 → 创建 API Key
-3. 模型广场 → 选择豆包模型（推荐 Doubao-1.5-pro）→ 创建在线推理接入点 → 获取 Endpoint ID
+3. 在线推理 → 预置推理接入点 → 找到 `doubao-seed-2-0-pro-260215` → 开通模型
 
-### 使用
+### Skill 自动调用
+
+配置好 API Key 后，Skill 在 Phase 4/5 会自动通过 Bash 工具调用脚本：
 
 ```bash
-# 仅生成分镜脚本
-python doubao_generator.py storyboard --brief "15秒温情回家短片，电影写实风格"
+# Phase 4：生成分镜
+python3 scripts/doubao_generator.py storyboard --brief "创意简报"
 
-# 根据已有分镜生成即梦提示词
-python doubao_generator.py prompt --brief "15秒温情回家短片" --storyboard storyboard.md
+# Phase 5：生成即梦提示词
+python3 scripts/doubao_generator.py prompt --brief "创意简报" --storyboard-file /tmp/storyboard.md
 
-# 一次性生成分镜 + 提示词（两步串联调用豆包）
-python doubao_generator.py full --brief "15秒咖啡品牌广告，小红书，温馨风格"
-
-# 流式输出（实时显示生成过程）
-python doubao_generator.py full --brief "15秒咖啡品牌广告" --stream
-
-# 保存到文件
-python doubao_generator.py full --brief "15秒咖啡品牌广告" -d output/
+# 一步到位（分镜 + 提示词）
+python3 scripts/doubao_generator.py full --brief "创意简报" -d /tmp/output/
 ```
 
-脚本会自动加载项目中的参考文件（词汇表、模板、示例）作为豆包的上下文，确保生成结果符合 Seedance 平台的格式要求。
+如果 API Key 未配置或调用失败，自动降级为 Claude 直接生成。
 
-### 项目结构
+### 也可独立使用
+
+```bash
+cd scripts
+
+# 仅生成分镜脚本
+python3 doubao_generator.py storyboard --brief "15秒温情回家短片，电影写实风格"
+
+# 根据已有分镜生成即梦提示词
+python3 doubao_generator.py prompt --brief "15秒温情回家短片" --storyboard-file storyboard.md
+
+# 一次性生成分镜 + 提示词
+python3 doubao_generator.py full --brief "15秒咖啡品牌广告，小红书，温馨风格" --stream
+```
+
+脚本自动加载项目参考文件（词汇表、模板、示例）注入豆包上下文，确保输出符合 Seedance 平台格式。
+
+### 文件结构
 
 ```
 scripts/
-├── doubao_generator.py     # 主脚本
-├── requirements.txt        # Python 依赖
+├── doubao_generator.py     # 主脚本（Skill 通过 Bash 调用）
+├── requirements.txt        # Python 依赖（openai, python-dotenv）
 ├── .env.example            # 环境变量模板
 └── .env                    # 你的配置（不入版本控制）
 ```
