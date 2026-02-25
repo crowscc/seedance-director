@@ -8,7 +8,7 @@ Seedance Director 是一个 Agent Skill，帮助用户在即梦（Seedance）AI 
 
 ## Architecture
 
-核心引擎是 `skills/seedance-director/SKILL.md`（372行），定义了5阶段工作流（Phase 1-5）和所有交互逻辑。参考文件**按需加载**，不要一次性读取所有文件。
+核心引擎是 `skills/seedance-director/SKILL.md`（~360行），定义了5阶段工作流（Phase 1-5）和所有交互逻辑。参考文件**按需加载**，不要一次性读取所有文件。
 
 ### 按需加载矩阵
 
@@ -48,5 +48,6 @@ skills/seedance-director/
 - references/ 下的文件是知识库，更新时保持中英双语对照格式
 - vocabulary.md 的9大分类结构（景别、运镜、角度、转场、节奏、风格、色调、光影、情绪）不要打乱
 - templates/ 中的分镜模板（A-E）各有独立场景定位，新增模板用新字母编号
-- output.html 是静态模板 + JSON 数据注入，修改时确保 JS 渲染逻辑与 SKILL.md 4.1 节的 JSON schema 字段名一致
+- output.html 是静态模板 + JSON 数据注入，JSON schema 内嵌在模板的 HTML 注释中（单一数据源），修改时确保 JS 渲染逻辑与 schema 字段名一致
 - 所有提示词示例必须遵循六板块结构
+- **README 同步更新**：修改 SKILL.md 或工作流逻辑后，同步更新 README.md 和 README_zh.md；工作流图（assets/workflow_zh.svg、assets/workflow_en.svg）使用 drawio MCP 工具重新生成
