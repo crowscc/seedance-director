@@ -210,6 +210,46 @@ options:
 
 **即梦生成时长固定为 15s**：即梦每次生成的视频统一为 15 秒。每个提示词对应一个 15s 片段，内含多个分镜（如镜头1: 0-3s → 镜头2: 3-7s → 镜头3: 7-12s → 镜头4: 12-15s）。多段视频通过即梦的**视频延长**功能衔接，充分利用视频模型能力，不依赖外部剪辑软件。
 
+**🤖 豆包生成分镜**：使用 Bash 工具调用豆包模型生成分镜脚本。
+
+**前置要求**：
+- 确保 `ARK_API_KEY` 环境变量已设置（如未设置，提示用户执行 `export ARK_API_KEY="your-api-key"`）
+- 首次使用时检查 openai 包是否安装，未安装则执行 `pip3 install openai`
+
+**调用步骤**：
+1. 整理 Phase 1-3 收集到的所有信息为 JSON 格式
+2. 使用 Bash 工具执行（`{skill目录}` 替换为本 SKILL.md 所在目录的实际路径）：
+```bash
+python3 {skill目录}/scripts/doubao_bridge.py << 'DOUBAO_INPUT'
+{
+  "mode": "storyboard",
+  "project": {
+    "title": "[项目标题]",
+    "topic": "[主题描述]",
+    "duration": "[时长，如 15秒]",
+    "aspectRatio": "[宽高比，如 16:9]",
+    "style": "[视觉风格]",
+    "narrativeStructure": "[叙事结构]",
+    "sceneType": "[场景类型]",
+    "soundRequirements": "[声音需求]",
+    "textureFeel": "[质感取向]",
+    "targetPlatform": "[目标平台]"
+  },
+  "assets": [
+    {"name": "素材名", "type": "character/scene/keyframe", "description": "描述"}
+  ],
+  "userNotes": "[用户额外要求]"
+}
+DOUBAO_INPUT
+```
+3. 解析返回的 JSON（`success` 字段为 `true` 时提取 `data.segments`）
+4. 以下方的专业分镜表格式展示给用户
+5. 如果返回 `data.rawText`（豆包返回非标准 JSON），直接展示原始文本并整理为表格
+6. 如果返回 `success: false`，根据 `error_type` 引导用户排查：
+   - `auth_error` → 提示检查 `ARK_API_KEY` 环境变量
+   - `api_error` / `timeout_error` → 建议重试
+   - `input_error` → 检查 openai 包是否安装（`pip3 install openai`）
+
 #### A) 单段模式（≤15s）
 
 输出专业分镜表（加载 `references/vocabulary.md` 获取精确术语）：
@@ -264,6 +304,40 @@ options:
 ### Phase 5: 生成即梦提示词 + 操作指引
 
 加载 `references/platform-capabilities.md` 获取模式选择和@引用规范。
+
+**🤖 豆包生成提示词**：使用 Bash 工具调用豆包模型将分镜转化为即梦提示词。
+
+**调用步骤**：
+1. 将 Phase 4 确认的分镜脚本完整内容 + Phase 1-3 的项目信息组装为 JSON
+2. 使用 Bash 工具执行（`{skill目录}` 替换为本 SKILL.md 所在目录的实际路径）：
+```bash
+python3 {skill目录}/scripts/doubao_bridge.py << 'DOUBAO_INPUT'
+{
+  "mode": "prompt",
+  "project": {
+    "title": "[项目标题]",
+    "topic": "[主题描述]",
+    "duration": "[时长]",
+    "aspectRatio": "[宽高比]",
+    "style": "[视觉风格]",
+    "narrativeStructure": "[叙事结构]",
+    "sceneType": "[场景类型]",
+    "soundRequirements": "[声音需求]",
+    "textureFeel": "[质感取向]",
+    "targetPlatform": "[目标平台]"
+  },
+  "assets": [
+    {"name": "素材名", "type": "character/scene/keyframe", "description": "描述"}
+  ],
+  "storyboard": "[Phase 4 确认的完整分镜脚本 markdown 文本]",
+  "userNotes": "[用户额外要求]"
+}
+DOUBAO_INPUT
+```
+3. 解析返回 JSON，提取 `data.segments`（含六板块提示词）、`data.operationGuide`、`data.tips`
+4. 按下方固定六板块格式展示每段提示词
+5. 展示操作指引和优化建议
+6. 错误处理同 Phase 4
 
 将分镜转化为可直接粘贴到即梦平台的提示词：
 - **单段**：输出 1 个推荐版本 + 操作指引，简要说明可调整方向（用户有需要再出变体）
