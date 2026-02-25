@@ -4,7 +4,7 @@ description: Guides users through AI video production on the Seedance (即梦) p
 license: MIT
 metadata:
   author: seedance-director
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # Seedance Director — AI 视频导演
