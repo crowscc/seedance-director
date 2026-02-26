@@ -45,11 +45,15 @@ Generates a professional shot-by-shot storyboard (shot sizes and camera moves in
 
 **Texture-feel decision** happens here — based on content type, platform, and your chosen style, the director decides between **realistic life feel** (handheld, natural light, micro-actions) and **polished production feel** (stabilized, studio lighting, precise framing). Your explicit style choice always overrides platform defaults.
 
-| Duration | Strategy |
-|----------|----------|
-| **≤ 15s** | Single generation |
-| **16-30s** | 2 segments — segment 2 uses **video extension** |
-| **31s+** | Each segment generated **independently** with turnaround sheets + scene art + last-frame references |
+**Each Seedance generation is fixed at 15s.** Every prompt = one 15s clip containing multiple shots (e.g., Shot 1: 0-3s → Shot 2: 3-7s → Shot 3: 7-12s → Shot 4: 12-15s). Multi-segment videos are connected via Seedance's built-in capabilities — no external editing software.
+
+For multi-segment videos, the connection strategy is **determined by the script**, not hardcoded:
+
+| Segment relationship | Strategy |
+|---------------------|----------|
+| Continuous scene, emotional progression, same space | **Video extension** |
+| Same style but location change | **Independent + first-frame reference** |
+| Completely different scene / style | **Fully independent generation** |
 
 Storyboard is confirmed via `AskUserQuestion` before moving on.
 
@@ -69,9 +73,12 @@ Converts confirmed storyboard into **copy-paste-ready prompts** for Seedance. Ev
   Shot 1 (0-3s): [shot size], [content], Character A: "dialogue", [camera move]
 
 ## Sound Design
-  BGM: [instruments, rhythm changes]
+  BGM: [style / instruments / rhythm changes]
   Ambient: [time-stamped sound effects]
-  Dialogue: [voice reference, tone]
+  Dialogue/Narration (one or both, full script required):
+    - Dialogue: written in Shot Descriptions — Character A: "full line" (Seedance auto-syncs lip movement)
+    - Narration: full script per shot — "Shot 1: 'The street holds the city's deepest warmth.'"
+    - Voice ref: [timbre and tone]
 
 ## Style Directives
   [Unified look: texture, color tone, lighting, depth of field]
@@ -80,9 +87,11 @@ Converts confirmed storyboard into **copy-paste-ready prompts** for Seedance. Ev
   No text, watermarks, logos
 ```
 
-Single-segment outputs 1 recommended version with adjustable directions. Multi-segment outputs one prompt per segment with connection guides.
+Single-segment outputs 1 recommended version + operation guide with adjustable directions. Multi-segment outputs one prompt per segment with connection guides.
 
-After prompts, the director collects feedback via `AskUserQuestion` — adjust specific shots, swap styles, or generate variants. When satisfied, outputs a **visual HTML page** (auto-opens in browser) with the full storyboard, prompts, and operation guide.
+**All audio (BGM, ambient, dialogue, narration) is generated directly by Seedance** — no post-production audio work. The operation guide only covers in-platform steps; prohibited steps include adding voiceover tracks, importing to editing software, or any TTS dubbing.
+
+After prompts, the director collects feedback via `AskUserQuestion` — adjust specific shots, swap styles, or generate variants — until you're satisfied.
 
 ## See It in Action
 
@@ -125,6 +134,8 @@ Director:
     ## Sound Design
     BGM: Light acoustic guitar, warm and relaxed
     Ambient: Café chatter, cup clinks, door chime
+    Narration — Shot 1: "Every morning starts with this warmth." Shot 3: "One cup. Simple as that."
+    Voice ref: Young female voice, light and natural
 
     ## Style Directives
     Japanese fresh, soft natural light, warm tones, shallow DOF
@@ -132,14 +143,14 @@ Director:
     ## Negatives
     No text, watermarks, logos
 
-  [Opens visual HTML page in browser]
+  [Operation guide:素材准备 → 生成参数 → 段间衔接 → 检查要点]
 ```
 
 ## Project Structure
 
 ```
 skills/seedance-director/
-├── SKILL.md                          # Core workflow engine (~410 lines)
+├── SKILL.md                          # Core workflow engine (~360 lines)
 ├── references/
 │   ├── platform-capabilities.md      # 10 Seedance modes + tech specs + @reference rules
 │   ├── narrative-structures.md       # 16 narrative structures with timing & selection guide
@@ -148,8 +159,7 @@ skills/seedance-director/
 ├── templates/
 │   ├── single-video.md               # 5 storyboard templates (A-E)
 │   ├── multi-segment.md              # Multi-segment templates for 30s/45s/60s+
-│   ├── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV / Short-video
-│   └── output.html                   # Visual HTML template (static + JSON data injection)
+│   └── scene-templates.md            # E-commerce / Xianxia / Drama / Education / MV / Short-video
 └── examples/
     ├── single-examples.md            # 6 complete single-segment examples
     └── multi-examples.md             # 4 complete multi-segment examples
