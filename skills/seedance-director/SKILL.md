@@ -4,7 +4,7 @@ description: Guides users through AI video production on the Seedance (即梦) p
 license: MIT
 metadata:
   author: seedance-director
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Seedance Director — AI 视频导演
@@ -26,15 +26,14 @@ metadata:
 | 文件 | 何时加载 | 内容 |
 |------|---------|------|
 | `references/platform-capabilities.md` | Phase 5 生成提示词时 | 10 种生成模式、技术参数、@引用规范 |
-| `references/narrative-structures.md` | Phase 2 讨论叙事结构时 | 16 种叙事结构详细说明、时间占比和选择指南 |
+| `references/narrative-structures.md` | Phase 2 讨论叙事结构/文案框架时 | 16 种叙事结构 + PREP/FIRE/RIDE 营销框架、时间占比和选择指南 |
 | `references/scene-strategies.md` | 用户场景明确后 | 6 类场景的专用策略和完整提示词示例 |
 | `references/vocabulary.md` | Phase 4-5 编写分镜/提示词时 | 景别、运镜、角度、节奏、转场、视觉风格词汇表 |
 | `templates/single-video.md` | 单段视频（≤15s）时 | 5 种分镜模板（A-E） |
 | `templates/multi-segment.md` | 多段视频（>15s）时 | 30s/45s/60s+ 多段模板和锚点设计 |
-| `templates/scene-templates.md` | 特定场景类型时 | 电商/仙侠/短剧/科普/MV/短视频 场景模板 |
+| `templates/scene-templates.md` | 特定场景类型时 | 电商/仙侠/短剧/科普/MV/短视频/旅游OTA 场景模板 |
 | `examples/single-examples.md` | 需要参考范例时 | 6 个完整单段示例 |
 | `examples/multi-examples.md` | 需要参考范例时 | 4 个完整多段示例 |
-| `templates/output.html` | Phase 5 输出可视化网页时 | 静态 HTML 模板，注入 JSON 数据渲染（见 4.1 节） |
 
 ---
 
@@ -296,7 +295,11 @@ options:
 无需引用上段素材，独立提示词即可
 ```
 
-**脚本质量自检**（分镜表完成后自动运行，附在分镜表之后输出）：
+---
+
+#### 脚本质量自检（单段和多段均适用）
+
+分镜表完成后自动运行，附在分镜表之后输出：
 
 | 检查项 | 结果 | 说明 |
 |--------|------|------|
