@@ -16,6 +16,59 @@ npx skills add https://github.com/crowscc/seedance-director
 
 Then describe your video idea. Activates on keywords like "Seedance", "即梦", "storyboard", "分镜", "运镜", etc.
 
+## See It in Action
+
+```
+You: I want a 15-second coffee product video for Xiaohongshu. Cozy vibe.
+
+Director: [AskUserQuestion] Which narrative structure fits best?
+          > AIDA — attention → interest → desire → action, classic for product ✓
+          > Daily Slice — a moment in life, natural and relatable
+          > Custom — describe your own
+
+You: AIDA
+
+Director: [AskUserQuestion] Missing product reference. Generate?
+          > ✅ Generate reference images
+          > ⏭ Skip, go straight to prompts
+
+You: Skip
+
+Director:
+  Storyboard (single, 9:16, Japanese fresh style):
+    001 | 0-2s  | POV          | Handheld Push | Hand pushes open café door, warm light
+    002 | 2-4s  | Close-Up     | Handheld      | Product on table, shallow DOF
+    003 | 4-6s  | Macro CU     | Slow Push In  | Surface detail, light spots
+    004 | 6-8s  | Medium Shot  | Handheld      | Using product, natural interaction
+    ...
+
+  Seedance prompt (paste directly):
+    ## Characters + References
+    @Image1 as product reference
+
+    ## Background
+    A warm afternoon in a sunlit café...
+
+    ## Shot Descriptions
+    Shot 1 (0-2s): POV, hand pushes open glass door, handheld, slight shake
+    Shot 2 (2-4s): Close-up, product on wooden table, window light
+    ...
+
+    ## Sound Design
+    BGM: Light acoustic guitar, warm and relaxed
+    Ambient: Café chatter, cup clinks, door chime
+    Narration — Shot 1: "Every morning starts with this warmth." Shot 3: "One cup. Simple as that."
+    Voice ref: Young female voice, light and natural
+
+    ## Style Directives
+    Japanese fresh, soft natural light, warm tones, shallow DOF
+
+    ## Negatives
+    No text, watermarks, logos
+
+  [Operation guide: asset prep → generation params → segment connection → review checklist]
+```
+
 ## Workflow
 
 <p align="center">
@@ -92,59 +145,6 @@ Single-segment outputs 1 recommended version + operation guide with adjustable d
 **All audio (BGM, ambient, dialogue, narration) is generated directly by Seedance** — no post-production audio work. The operation guide only covers in-platform steps; prohibited steps include adding voiceover tracks, importing to editing software, or any TTS dubbing.
 
 After prompts, the director collects feedback via `AskUserQuestion` — adjust specific shots, swap styles, or generate variants — until you're satisfied.
-
-## See It in Action
-
-```
-You: I want a 15-second coffee product video for Xiaohongshu. Cozy vibe.
-
-Director: [AskUserQuestion] Which narrative structure fits best?
-          > AIDA — attention → interest → desire → action, classic for product ✓
-          > Daily Slice — a moment in life, natural and relatable
-          > Custom — describe your own
-
-You: AIDA
-
-Director: [AskUserQuestion] Missing product reference. Generate?
-          > ✅ Generate reference images
-          > ⏭ Skip, go straight to prompts
-
-You: Skip
-
-Director:
-  Storyboard (single, 9:16, Japanese fresh style):
-    001 | 0-2s  | POV          | Handheld Push | Hand pushes open café door, warm light
-    002 | 2-4s  | Close-Up     | Handheld      | Product on table, shallow DOF
-    003 | 4-6s  | Macro CU     | Slow Push In  | Surface detail, light spots
-    004 | 6-8s  | Medium Shot  | Handheld      | Using product, natural interaction
-    ...
-
-  Seedance prompt (paste directly):
-    ## Characters + References
-    @Image1 as product reference
-
-    ## Background
-    A warm afternoon in a sunlit café...
-
-    ## Shot Descriptions
-    Shot 1 (0-2s): POV, hand pushes open glass door, handheld, slight shake
-    Shot 2 (2-4s): Close-up, product on wooden table, window light
-    ...
-
-    ## Sound Design
-    BGM: Light acoustic guitar, warm and relaxed
-    Ambient: Café chatter, cup clinks, door chime
-    Narration — Shot 1: "Every morning starts with this warmth." Shot 3: "One cup. Simple as that."
-    Voice ref: Young female voice, light and natural
-
-    ## Style Directives
-    Japanese fresh, soft natural light, warm tones, shallow DOF
-
-    ## Negatives
-    No text, watermarks, logos
-
-  [Operation guide:素材准备 → 生成参数 → 段间衔接 → 检查要点]
-```
 
 ## Project Structure
 
