@@ -348,7 +348,7 @@ options:
 
 **禁止出现的步骤**：添加旁白音轨、添加BGM音轨、导入剪映、调整音画对位、TTS配音 — 这些全部在即梦提示词的声音设计板块中完成。
 
-**输出后确认**：使用 `AskUserQuestion` 收集反馈。options 始终包含「满意，生成可视化网页」，其余选项根据输出内容动态生成（如「调整第 N 段的运镜/台词/声音设计」「换一种风格指令」「出一个简洁版/详细版变体」等）。用户满意后进入 4.1 节 HTML 可视化输出。
+**输出后确认**：使用 `AskUserQuestion` 收集反馈。options 动态生成（如「调整第 N 段的运镜/台词/声音设计」「换一种风格指令」「出一个简洁版/详细版变体」等），直到用户满意为止。
 
 ---
 
@@ -359,32 +359,4 @@ options:
 1. **分镜脚本** — 专业表格，景别运镜中英双语（如"近景 Close-Up"），台词标注说话人，时间精确到秒
 2. **即梦提示词** — 可直接复制粘贴，固定六板块：角色+参考图 → 背景介绍 → 镜头描述（含说话人） → 声音设计 → 风格指令 → 禁止项
 3. **操作指引** — 素材准备、上传顺序、参数设置、检查要点
-4. **优化建议**（可选） — 替代运镜/转场、色调变体、素材优化、拼接技巧
-
-### 4.1 HTML 可视化输出
-
-Phase 5 完成后，使用 Task 工具派发一个**独立 subagent** 生成可视化网页。模板 `templates/output.html` 是静态 HTML + JS 渲染器，内嵌了完整的 JSON Schema 注释，**subagent 读取模板即可获知数据格式**。
-
-**主 agent 职责**：
-1. 将 Phase 5 的全部成果（分镜、提示词、操作指引、优化建议）组装为 JSON 数据
-2. 通过 Task 工具派发 subagent，传递以下信息：
-   - 模板文件路径：`templates/output.html`（相对于 skill 目录）
-   - 完整的 JSON 数据（直接嵌入 prompt）
-   - 输出文件路径：`output.html`（工作目录下）
-
-**subagent prompt 模板**：
-```
-读取 {skill目录}/templates/output.html 模板文件。
-将 <script id="project-data" type="application/json"> 标签内的占位内容替换为以下 JSON 数据。
-只替换 JSON 数据块，不要修改 HTML/CSS/JS 代码。
-用 Write 工具保存为 output.html，然后用 Bash 工具执行 `open output.html` 在浏览器中打开。
-
-JSON 数据：
-{此处粘贴完整 JSON}
-```
-
-**JSON 数据格式**：参见模板文件 `<script id="project-data">` 上方的 Schema 注释。主 agent 组装 JSON 时遵守以下规则：
-- `connection` 仅多段模式的非末段提供，单段模式或末段省略该字段
-- `promptSections` 的 6 个字段与六板块一一对应，不可增删
-- `dialogue` 无台词时填空字符串 `""`，不要填 `"无"`
-- JSON 必须合法（转义双引号、无尾逗号）
+4. **优化建议**（可选） — 替代运镜/转场、色调变体、素材优化
