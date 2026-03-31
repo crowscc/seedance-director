@@ -83,14 +83,20 @@ Missing info gets filled via `AskUserQuestion` — options are **dynamically ran
 
 Narrative structure is **always discussed** even when most dimensions are clear.
 
-### Phase 3: Asset Preparation
+### Phase 3: Asset Preparation (Normal / Pro Mode)
 
-Checks what visual references you have. **Have everything? Auto-skip. Missing something?** You choose:
+Runs in **Normal mode** by default (skips frame generation, goes straight to storyboard). **Pro mode** (full per-shot reference frames) only activates when you explicitly ask for it.
 
-- **Generate reference images** — character turnaround sheets, scene concepts, key frames (improves cross-shot consistency)
-- **Skip, go straight to storyboard** — provide your own assets or use text-to-video
+**Normal mode** checks what visual references you have:
+
+- **Have character references?** → Skip Phase 3 entirely
+- **Missing references?** → Generate character turnaround sheets only, then proceed
+
+**Pro mode** (on request): generates complete composition frames for every key shot — character (@reference) + background + on-screen text elements — for precise visual control.
 
 Multiple assets are generated in **parallel** via subagents.
+
+**Fast track**: If you provide both character references AND a complete storyboard table, Phase 2 (storyboard design) and Phase 4 (user confirmation) are skipped — straight to prompt generation.
 
 ### Phase 4: Storyboard
 
@@ -100,13 +106,15 @@ Generates a professional shot-by-shot storyboard (shot sizes and camera moves in
 
 **Each Seedance generation is fixed at 15s.** Every prompt = one 15s clip containing multiple shots (e.g., Shot 1: 0-3s → Shot 2: 3-7s → Shot 3: 7-12s → Shot 4: 12-15s). Multi-segment videos are connected via Seedance's built-in capabilities — no external editing software.
 
-For multi-segment videos, the connection strategy is **determined by the script**, not hardcoded:
+For multi-segment videos, **video extension is the default** — it produces the most natural BGM/audio/visual continuity:
 
-| Segment relationship | Strategy |
-|---------------------|----------|
-| Continuous scene, emotional progression, same space | **Video extension** |
-| Same style but location change | **Independent + first-frame reference** |
-| Completely different scene / style | **Fully independent generation** |
+| Priority | Strategy | When to use |
+|----------|----------|-------------|
+| **Default** | **Video extension** (chain) | Most cases. BGM/voice/visuals stay seamless |
+| Fallback | **Independent + first-frame ref** | Full scene jump, or need to redo one segment without affecting others |
+| Special | **Fully independent** | Montage, style switch |
+
+**Chain dependency note**: video extension is sequential (seg 1 → extend to seg 2 → extend to seg 3). If segment N is unsatisfactory, segment N+1 and beyond must be regenerated. Generate 2-3 versions per segment, pick the best, then extend.
 
 Storyboard is confirmed via `AskUserQuestion` before moving on.
 
@@ -150,7 +158,7 @@ After prompts, the director collects feedback via `AskUserQuestion` — adjust s
 
 ```
 skills/seedance-director/
-├── SKILL.md                          # Core workflow engine (~360 lines)
+├── SKILL.md                          # Core workflow engine (~400 lines)
 ├── references/
 │   ├── platform-capabilities.md      # 10 Seedance modes + tech specs + @reference rules
 │   ├── narrative-structures.md       # 16 narrative structures with timing & selection guide
