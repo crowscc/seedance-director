@@ -21,7 +21,7 @@ metadata:
 
 ## 2. 参考文件导航
 
-按需加载，不要一次性全部加载：
+按需加载，不要一次性全部加载。**只有以下 9 个文件，禁止拼造不存在的文件路径**：
 
 | 文件 | 何时加载 | 内容 |
 |------|---------|------|
@@ -29,9 +29,9 @@ metadata:
 | `references/narrative-structures.md` | Phase 2 讨论叙事结构/文案框架时 | 16 种叙事结构 + PREP/FIRE/RIDE 营销框架、时间占比和选择指南 |
 | `references/scene-strategies.md` | 用户场景明确后 | 6 类场景的专用策略和完整提示词示例 |
 | `references/vocabulary.md` | Phase 4-5 编写分镜/提示词时 | 景别、运镜、角度、节奏、转场、视觉风格词汇表 |
-| `templates/single-video.md` | 单段视频（≤15s）时 | 5 种分镜模板（A-E） |
-| `templates/multi-segment.md` | 多段视频（>15s）时 | 30s/45s/60s+ 多段模板和锚点设计 |
-| `templates/scene-templates.md` | 特定场景类型时 | 电商/仙侠/短剧/科普/MV/短视频/旅游OTA 场景模板 |
+| `templates/single-video.md` | Phase 4 单段视频（≤15s）时 | 5 种分镜模板（A-E） |
+| `templates/multi-segment.md` | Phase 4 多段视频（>15s）时 | 30s/45s/60s+ 多段模板和锚点设计 |
+| `templates/scene-templates.md` | Phase 4 匹配场景类型时 | 7 大场景模板（电商/仙侠/短剧/科普/MV/短视频种草/旅游OTA），所有场景都在此单一文件中，按用户内容匹配最近的场景章节 |
 | `examples/single-examples.md` | 需要参考范例时 | 6 个完整单段示例 |
 | `examples/multi-examples.md` | 需要参考范例时 | 4 个完整多段示例 |
 
@@ -298,13 +298,25 @@ options:
 
 ### Phase 4: 生成分镜脚本
 
+**场景模板加载**：根据 Phase 1-2 确定的内容类型，从 `templates/scene-templates.md` 中匹配最接近的场景类型，加载该场景的专属镜头策略和分镜模板作为参考。**注意：模板文件只有下方 3 个，禁止拼造不存在的模板文件名**：
+
+| 内容类型关键词 | 匹配场景 | 模板文件（固定，不可自造文件名） |
+|--------------|---------|-------------------------------|
+| 产品广告、品牌宣传、产品展示 | 场景1：电商/广告 | `templates/scene-templates.md` → 场景1 |
+| 漫剧、仙侠、玄幻、动画 | 场景2：AI漫剧/仙侠 | `templates/scene-templates.md` → 场景2 |
+| 短剧、微电影、对白剧情 | 场景3：短剧/对白 | `templates/scene-templates.md` → 场景3 |
+| 知识分享、教程、科普、干货 | 场景4：科普教学 | `templates/scene-templates.md` → 场景4 |
+| MV、音乐、卡点、歌曲可视化 | 场景5：MV/音乐卡点 | `templates/scene-templates.md` → 场景5 |
+| 开箱、测评、晒单、种草、好物分享、Vlog、日常 | 场景6：短视频/种草 | `templates/scene-templates.md` → 场景6 |
+| 旅游、景点、酒店、OTA | 场景7：旅游/OTA | `templates/scene-templates.md` → 场景7 |
+
 **质感取向前置判断**：生成分镜前，根据内容类型、目标平台和用户选择的视觉风格确定质感取向（真实生活感 / 精致制作感 / 混合）。判断逻辑见 Phase 5「活人感判断」表，但**用户在 Phase 2 显式选择的风格优先**（如用户为抖音视频选了"电影写实"，则按精致制作感设计分镜，不因平台覆盖）。质感取向直接影响分镜中的运镜（手持 vs 稳定器）、光线（自然光 vs 专业布光）、构图（随意 vs 精确）选择。
 
 **即梦生成时长固定为 15s**：即梦每次生成的视频统一为 15 秒。每个提示词对应一个 15s 片段，内含多个分镜（如镜头1: 0-3s → 镜头2: 3-7s → 镜头3: 7-12s → 镜头4: 12-15s）。多段视频通过即梦的**视频延长**功能衔接，充分利用视频模型能力，不依赖外部剪辑软件。
 
 #### A) 单段模式（≤15s）
 
-输出专业分镜表（加载 `references/vocabulary.md` 获取精确术语）：
+输出专业分镜表（加载 `templates/single-video.md` 获取分镜模板，加载 `references/vocabulary.md` 获取精确术语）：
 
 ```
 ## 分镜脚本：[标题]
@@ -327,6 +339,8 @@ options:
 ```
 
 #### B) 多段模式（>15s）
+
+加载 `templates/multi-segment.md` 获取多段模板和锚点设计。
 
 1. 输出完整故事大纲（叙事逻辑、情绪曲线、关键转折）
 2. 拆段：16-30s → 2段 / 31-45s → 3段 / 46-60s → 4段 / >60s → 按场景拆
